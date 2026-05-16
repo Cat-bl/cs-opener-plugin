@@ -28,3 +28,7 @@ Thumbs.db
 # Node
 node_modules/
 npm-debug.log*
+# Yunzai 插件惯例不提交 lock（与主项目 npm 版本不一定一致，会冲突）
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
