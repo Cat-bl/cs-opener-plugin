@@ -10,7 +10,7 @@
 import { createCanvas } from '@napi-rs/canvas'
 import { rollRarityNumForCase } from '../rarity.js'
 import Config from '../config.js'
-import { EASE_SPIN } from './easing.js'
+import { EASE_SPIN, EASE_OUT } from './easing.js'
 import { ensureFonts, loadAssets, buildGoldHaloSprite } from './assets.js'
 
 /* 金色光晕是纯函数确定输出（无参数），永久缓存避免每次开箱重新生成 1024×1024 ImageData（~4MB + ~200ms） */
