@@ -18,12 +18,9 @@ import { encodeMP4 } from './encode.js'
 const TOTAL_ITEMS  = 30
 const WINNER_INDEX = 26
 
-function buildLayout(W, H, INTRO_MS, REVEAL_MS) {
+function buildLayout(W, H, REVEAL_MS, introItemCount, baseIntroMs = 2000) {
   const TRANSITION_MS    = 350
   const SPIN_DURATION_MS = 6000
-  const SPIN_START_MS    = INTRO_MS + TRANSITION_MS
-  const REVEAL_START_MS  = SPIN_START_MS + SPIN_DURATION_MS + 50
-  const TOTAL_MS         = REVEAL_START_MS + REVEAL_MS
 
   const SPIN_ITEM_H      = 294
   const SPIN_ITEM_W      = Math.round(SPIN_ITEM_H / 0.733)  // 401
@@ -37,12 +34,37 @@ function buildLayout(W, H, INTRO_MS, REVEAL_MS) {
   const DROP_ITEM_H      = Math.round(DROP_ITEM_W * 0.74)
   const DROP_GRID_COLS   = Math.max(1, Math.floor((W - VIEW_PAD_X*2 + 12) / (DROP_ITEM_W + 12)))
   const DROP_CELL_W      = Math.floor((W - VIEW_PAD_X*2 - (DROP_GRID_COLS-1)*12) / DROP_GRID_COLS)
+  const DROP_CELL_IMG_H  = Math.round(DROP_CELL_W * 0.5)
+  const DROP_CELL_H      = DROP_CELL_IMG_H + 30
+  const DROP_CELL_GAP    = 8
+  const GRID_START_Y     = 274
+  const GRID_BOTTOM_PAD  = 8
+
+  // 算 intro grid 滚动距离
+  const totalRows  = Math.ceil(Math.max(0, introItemCount) / DROP_GRID_COLS)
+  const contentH   = totalRows > 0 ? totalRows * (DROP_CELL_H + DROP_CELL_GAP) - DROP_CELL_GAP : 0
+  const visibleH   = H - GRID_START_Y - GRID_BOTTOM_PAD
+  const INTRO_SCROLL = Math.max(0, contentH - visibleH)
+
+  // 需要滚动时拉长 intro：停留 1s + 滚动 2s + 停留 1s
+  const INTRO_STAY_BEFORE = 1000
+  const INTRO_SCROLL_DUR  = 2000
+  const INTRO_STAY_AFTER  = 1000
+  const INTRO_MS = INTRO_SCROLL > 0
+    ? INTRO_STAY_BEFORE + INTRO_SCROLL_DUR + INTRO_STAY_AFTER
+    : baseIntroMs
+
+  const SPIN_START_MS    = INTRO_MS + TRANSITION_MS
+  const REVEAL_START_MS  = SPIN_START_MS + SPIN_DURATION_MS + 50
+  const TOTAL_MS         = REVEAL_START_MS + REVEAL_MS
 
   return {
     W, H, INTRO_MS, TRANSITION_MS, SPIN_DURATION_MS, SPIN_START_MS, REVEAL_START_MS, REVEAL_MS, TOTAL_MS,
+    INTRO_STAY_BEFORE, INTRO_SCROLL_DUR, INTRO_STAY_AFTER, INTRO_SCROLL,
     SPIN_ITEM_W, SPIN_ITEM_H, SPIN_ITEM_MARGIN, STRIDE, STRIP_Y,
     LETTERBOX_H, POINTER_X, TOTAL_ITEMS, WINNER_INDEX,
     VIEW_PAD_X, DROP_ITEM_W, DROP_ITEM_H, DROP_GRID_COLS, DROP_CELL_W,
+    DROP_CELL_IMG_H, DROP_CELL_H, DROP_CELL_GAP, GRID_START_Y, GRID_BOTTOM_PAD,
   }
 }
 
@@ -89,14 +111,14 @@ export async function renderOpenVideo(drop, caseObj, outPath, opts = {}) {
   const fps     = opts.fps      ?? cfg.fps      ?? 60
   const W       = opts.width    ?? cfg.width    ?? 1280
   const H       = opts.height   ?? cfg.height   ?? 720
-  const INTRO_MS  = opts.introMs  ?? cfg.introMs  ?? 2000
-  const REVEAL_MS = opts.revealMs ?? cfg.revealMs ?? 5500
-
-  const layout = buildLayout(W, H, INTRO_MS, REVEAL_MS)
-  const TOTAL_FRAMES = Math.round(layout.TOTAL_MS / 1000 * fps)
+  const baseIntroMs = opts.introMs  ?? cfg.introMs  ?? 2000
+  const REVEAL_MS   = opts.revealMs ?? cfg.revealMs ?? 5500
 
   const stripItems = buildStripItems(caseObj, drop)
   const introItems = buildIntroItems(caseObj)
+  const layout = buildLayout(W, H, REVEAL_MS, introItems.length, baseIntroMs)
+  const TOTAL_FRAMES = Math.round(layout.TOTAL_MS / 1000 * fps)
+
   const assets = await loadAssets(caseObj, drop, stripItems, introItems)
   const goldSprite = buildGoldHaloSprite()
   const jitter = (Math.random() - 0.5) * (layout.SPIN_ITEM_W * 0.65)

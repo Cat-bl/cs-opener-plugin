@@ -53,9 +53,10 @@ export function encodeMP4({
     const KX_AT   = introMs + transitionMs
     const WIN_AT  = KX_AT + spinDurMs
 
+    // 滚动嘀嘀声: 截前 6 秒(对应 spin 时长)，在第 5.7s 起淡出 0.3s，刚好在 spin 结束 / 中奖音响起前归零
     const filter =
       `[1:a]adelay=${DROP_AT}|${DROP_AT},volume=0.6[a1];` +
-      `[2:a]atrim=0:6.1,adelay=${KX_AT}|${KX_AT},afade=t=out:st=6:d=0.3,volume=1.0[a2];` +
+      `[2:a]atrim=0:6,adelay=${KX_AT}|${KX_AT},afade=t=out:st=5.7:d=0.3,volume=1.0[a2];` +
       `[3:a]adelay=${WIN_AT}|${WIN_AT},volume=1.0[a3];` +
       `[a1][a2][a3]amix=inputs=3:duration=longest:dropout_transition=0:normalize=0,` +
       `apad=whole_dur=${totalMs}ms[aout]`

@@ -120,22 +120,27 @@ function drawIntroCell(ctx, x, y, w, h, item, img, assets, caseObj) {
   ctx.textBaseline = 'top'
   if (item.isGoldSummary) {
     ctx.fillStyle = 'rgb(255,215,0)'
-    ctx.font = '700 14px "YaHei",sans-serif'
-    ctx.fillText(truncateText(ctx, item.weapon, w), x, y + h + 6)
+    ctx.font = '700 12px "YaHei",sans-serif'
+    ctx.fillText(truncateText(ctx, item.weapon, w), x, y + h + 4)
     ctx.fillStyle = '#fff'
-    ctx.font = '12px "YaHei",sans-serif'
-    ctx.fillText(truncateText(ctx, item.paint, w), x, y + h + 24)
+    ctx.font = '11px "YaHei",sans-serif'
+    ctx.fillText(truncateText(ctx, item.paint, w), x, y + h + 20)
   } else {
     ctx.fillStyle = '#fff'
-    ctx.font = '700 14px "YaHei",sans-serif'
-    ctx.fillText(truncateText(ctx, item.weapon, w), x, y + h + 6)
-    ctx.font = '12px "YaHei",sans-serif'
-    ctx.fillText(truncateText(ctx, item.paint || '原版', w), x, y + h + 24)
+    ctx.font = '700 12px "YaHei",sans-serif'
+    ctx.fillText(truncateText(ctx, item.weapon, w), x, y + h + 4)
+    ctx.font = '11px "YaHei",sans-serif'
+    ctx.fillText(truncateText(ctx, item.paint || '原版', w), x, y + h + 20)
   }
 }
 
 export function drawIntro(ctx, layout, tMs, state) {
-  const { W, H, INTRO_MS, TRANSITION_MS, VIEW_PAD_X, DROP_ITEM_H, DROP_CELL_W, DROP_GRID_COLS } = layout
+  const {
+    W, H, INTRO_MS, TRANSITION_MS,
+    VIEW_PAD_X, DROP_CELL_W, DROP_GRID_COLS,
+    DROP_CELL_IMG_H, DROP_CELL_H, DROP_CELL_GAP, GRID_START_Y, GRID_BOTTOM_PAD,
+    INTRO_SCROLL, INTRO_STAY_BEFORE, INTRO_SCROLL_DUR,
+  } = layout
   const { caseObj, assets, introItems } = state
 
   let dropOffsetY = 0, alpha = 1
@@ -158,30 +163,30 @@ export function drawIntro(ctx, layout, tMs, state) {
   ctx.shadowColor = 'rgba(0,0,0,.7)'
   ctx.shadowOffsetY = 2; ctx.shadowBlur = 8
   const title = (caseObj.category === 'weapon_case') ? '开 箱' : (caseObj.categoryLabel || '开 箱')
-  ctx.fillText(title, W / 2, 30)
+  ctx.fillText(title, W / 2, 20)
 
   ctx.fillStyle = 'rgb(205,205,205)'
-  ctx.font = '300 20px "YaHei",sans-serif'
+  ctx.font = '300 18px "YaHei",sans-serif'
   const sub1 = '解锁 '
   const sub1W = ctx.measureText(sub1).width
-  ctx.font = '700 20px "YaHei",sans-serif'
+  ctx.font = '700 18px "YaHei",sans-serif'
   const sub2W = ctx.measureText(caseObj.name).width
-  const subY = 76
-  ctx.font = '300 20px "YaHei",sans-serif'
+  const subY = 60
+  ctx.font = '300 18px "YaHei",sans-serif'
   ctx.textAlign = 'left'
   ctx.fillStyle = 'rgb(205,205,205)'
   ctx.fillText(sub1, W / 2 - (sub1W + sub2W) / 2, subY)
-  ctx.font = '700 20px "YaHei",sans-serif'
+  ctx.font = '700 18px "YaHei",sans-serif'
   ctx.fillStyle = 'rgb(235,235,240)'
   ctx.fillText(caseObj.name, W / 2 - (sub1W + sub2W) / 2 + sub1W, subY)
   ctx.shadowBlur = 0; ctx.shadowOffsetY = 0
 
   if (assets.caseImg) {
-    const caseH = 200
+    const caseH = 140
     const ar = assets.caseImg.width / assets.caseImg.height
     const caseW = caseH * ar
     const floatY = Math.sin(tMs / 4000 * Math.PI * 2) * 6
-    const cy = 111 + caseH / 2 + floatY
+    const cy = 90 + caseH / 2 + floatY
     ctx.save()
     ctx.shadowColor = 'rgba(0,0,0,.7)'
     ctx.shadowOffsetY = 6; ctx.shadowBlur = 16
@@ -192,21 +197,43 @@ export function drawIntro(ctx, layout, tMs, state) {
   ctx.textAlign = 'left'
   ctx.fillStyle = 'rgb(236,235,240)'
   ctx.font = '13px "YaHei",sans-serif'
-  ctx.fillText('这个箱子里可能有以下物品：', VIEW_PAD_X, 345)
+  ctx.fillText('这个箱子里可能有以下物品：', VIEW_PAD_X, 248)
   ctx.fillStyle = 'rgba(255,255,255,.15)'
-  ctx.fillRect(VIEW_PAD_X, 363, W - VIEW_PAD_X * 2, 1)
+  ctx.fillRect(VIEW_PAD_X, 266, W - VIEW_PAD_X * 2, 1)
 
-  const gridStartY = 373
-  const cellH = DROP_ITEM_H + 40
-  const visibleRows = Math.max(1, Math.floor((H - gridStartY - 10) / (cellH + 12)))
-  const visibleCount = visibleRows * DROP_GRID_COLS
-  for (let i = 0; i < Math.min(visibleCount, introItems.length); i++) {
+  // grid：装得下时静态展示；装不下时滚动（停 1s → 滚 2s → 停 1s）
+  const gridStartY = GRID_START_Y
+  const cellImgH = DROP_CELL_IMG_H
+  const cellH = DROP_CELL_H
+  const visibleH = H - gridStartY - GRID_BOTTOM_PAD
+
+  let scrollY = 0
+  if (INTRO_SCROLL > 0) {
+    if (tMs < INTRO_STAY_BEFORE) {
+      scrollY = 0
+    } else if (tMs < INTRO_STAY_BEFORE + INTRO_SCROLL_DUR) {
+      scrollY = INTRO_SCROLL * (tMs - INTRO_STAY_BEFORE) / INTRO_SCROLL_DUR
+    } else {
+      scrollY = INTRO_SCROLL
+    }
+  }
+
+  // clip 限制 grid 区域，超出部分自动裁掉（避免滚动时上下溢出影响标题/箱图）
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(VIEW_PAD_X, gridStartY, W - VIEW_PAD_X * 2, visibleH)
+  ctx.clip()
+
+  for (let i = 0; i < introItems.length; i++) {
     const r = Math.floor(i / DROP_GRID_COLS)
     const c = i % DROP_GRID_COLS
     const x = VIEW_PAD_X + c * (DROP_CELL_W + 12)
-    const y = gridStartY + r * (cellH + 12)
-    drawIntroCell(ctx, x, y, DROP_CELL_W, DROP_ITEM_H, introItems[i], assets.introImgs[i], assets, caseObj)
+    const y = gridStartY + r * (cellH + DROP_CELL_GAP) - scrollY
+    // 粗略剔除（cell 完全在 clip 外才跳过）
+    if (y + cellH + 24 < gridStartY || y > gridStartY + visibleH) continue
+    drawIntroCell(ctx, x, y, DROP_CELL_W, cellImgH, introItems[i], assets.introImgs[i], assets, caseObj)
   }
+  ctx.restore()
 
   ctx.restore()
 }
