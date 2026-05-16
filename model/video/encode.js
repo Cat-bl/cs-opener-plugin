@@ -49,7 +49,7 @@ export function encodeMP4({
    */
   const x264 = [
     '-c:v', 'libx264',
-    '-preset', 'medium',
+    '-preset', 'veryfast',
     '-crf', '20',
     '-g', String(fps),
     '-keyint_min', String(fps),
