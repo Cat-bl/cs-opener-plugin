@@ -1,0 +1,109 @@
+/* ========== 中奖记录视图 ========== */
+
+.hist-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.hist-stat {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+}
+.hist-stat-label {
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.hist-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+.hist-stat-sub {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+.hist-rarity-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+  background: var(--bg-3);
+}
+.hist-rarity-bar > div {
+  height: 100%;
+}
+
+.hist-list {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.hist-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 130px 110px 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+/* 平板：压缩列 */
+@media (max-width: 1024px) {
+  .hist-row {
+    grid-template-columns: 90px 1fr 90px 80px 60px;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+/* 手机：换 2 行布局，避免横向溢出 */
+@media (max-width: 640px) {
+  .hist-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name time"
+      "case wear"
+      "case st";
+    gap: 4px 12px;
+    padding: 10px;
+  }
+  .hist-row.head { display: none; }
+  .hist-row .hist-time { grid-area: time; text-align: right; font-size: 10px; }
+  .hist-row .hist-name { grid-area: name; }
+  .hist-row .hist-case { grid-area: case; font-size: 11px; }
+  .hist-row .hist-wear { grid-area: wear; text-align: right; }
+  .hist-row > div:nth-child(5) { grid-area: st; text-align: right; }
+}
+.hist-row:last-child { border-bottom: none; }
+.hist-row.head {
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.hist-time { color: var(--text-2); }
+.hist-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+.hist-dot { width: 8px; height: 8px; border-radius: 2px; }
+.hist-case { color: var(--text-1); }
+.hist-wear { color: var(--text-1); }
+
+.hist-empty {
+  text-align: center;
+  padding: 60px;
+  color: var(--text-2);
+}

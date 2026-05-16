@@ -1,0 +1,17 @@
+# 由 tools/download_skins.mjs 一次性生成的资源（~600 MB），不入 git
+assets/skins/
+assets/data/crates.json
+assets/data/crates.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# Node
+node_modules/
+npm-debug.log*

@@ -1,0 +1,190 @@
+/* ========== 顶栏 / 视图容器 / 底栏 ========== */
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ----- 顶栏 ----- */
+.topbar {
+  flex: 0 0 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: linear-gradient(180deg, #1a2129, #0f141a);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,.6);
+  z-index: 10;
+  gap: 6px;
+}
+@media (max-width: 1024px) {
+  .topbar { padding: 0 12px; gap: 4px; }
+}
+@media (max-width: 640px) {
+  .topbar { padding: 0 8px; flex: 0 0 48px; }
+  .logo-sub { display: none; }
+  .logo { font-size: 16px !important; }
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+.logo-c  { color: #fff; }
+.logo-go { color: var(--accent); }
+.logo-sub {
+  margin-left: 12px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-2);
+  letter-spacing: 2px;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 40px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  padding: 8px 18px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--text-1);
+  border-radius: var(--r-sm);
+  position: relative;
+  transition: color .15s ease, background .15s ease;
+  white-space: nowrap;
+}
+@media (max-width: 1024px) {
+  .nav { margin-left: 16px; }
+  .nav a { padding: 6px 10px; font-size: 12px; letter-spacing: 0; }
+}
+@media (max-width: 640px) {
+  .nav { margin-left: 8px; gap: 2px; }
+  .nav a { padding: 5px 8px; font-size: 12px; }
+}
+.nav a:hover { color: #fff; background: rgba(255,255,255,.04); }
+.nav a.active {
+  color: var(--accent-glow);
+  background: rgba(217,153,50,.08);
+}
+.nav a.active::after {
+  content: '';
+  position: absolute;
+  left: 12px; right: 12px; bottom: 2px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.wallet {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-glow);
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .wallet { padding: 4px 8px; font-size: 13px; gap: 6px; }
+  .coin-icon { width: 16px !important; height: 16px !important; font-size: 11px !important; }
+  #reset-btn { width: 18px !important; height: 18px !important; font-size: 13px !important; }
+}
+.coin-icon {
+  display: inline-flex;
+  width: 20px; height: 20px;
+  background: linear-gradient(180deg, #f2b03c, #c08020);
+  border-radius: 50%;
+  color: #16110a;
+  font-size: 13px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+#reset-btn {
+  margin-left: 8px;
+  font-size: 16px;
+  color: var(--text-2);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  transition: color .15s, transform .3s;
+}
+#reset-btn:hover { color: var(--accent); transform: rotate(180deg); }
+
+/* ----- 视图容器 ----- */
+.view {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse at top, rgba(217,153,50,.04), transparent 60%),
+    var(--bg-0);
+  padding: var(--view-pad-y) var(--view-pad-x);
+}
+
+/* ----- 底栏 ----- */
+.bottombar {
+  flex: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-1);
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 0 12px;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .bottombar { flex: 0 0 22px; font-size: 10px; letter-spacing: 0; }
+  .bottombar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* case 路由下隐藏底栏，让开箱动画的 letterbox 黑边延伸到屏幕底 */
+body.case-mode .bottombar { display: none; }
+
+/* ----- 视图通用标题 ----- */
+.view-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.view-subtitle {
+  font-size: 12px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+.view-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 640px) {
+  .view-title { font-size: 18px !important; letter-spacing: 1px !important; }
+  .view-subtitle { font-size: 11px !important; }
+  .view-header { margin-bottom: 12px; padding-bottom: 8px; }
+}
