@@ -30,6 +30,21 @@ function readYaml(file) {
   }
 }
 
+/* 递归找 default 里有、user 里没有的 leaf path */
+function missingPaths(user, defaults, prefix = '') {
+  const result = []
+  for (const [k, dv] of Object.entries(defaults || {})) {
+    const p = prefix ? `${prefix}.${k}` : k
+    const isObj = v => v && typeof v === 'object' && !Array.isArray(v)
+    if (user == null || !(k in user)) {
+      result.push({ path: p, value: dv })
+    } else if (isObj(dv) && isObj(user[k])) {
+      result.push(...missingPaths(user[k], dv, p))
+    }
+  }
+  return result
+}
+
 class Config {
   constructor() {
     ensureUserConfig()
@@ -42,7 +57,24 @@ class Config {
     const userFile    = path.join(USER_DIR, `${name}.yaml`)
     const defaultFile = path.join(DEFAULT_DIR, `${name}.yaml`)
     const defaults    = readYaml(defaultFile)
-    const user        = readYaml(userFile)
+    let user          = readYaml(userFile)
+
+    // 启动时自动把 default 新增字段写入 user 文件（保留原注释和已有改动）
+    const missing = missingPaths(user, defaults)
+    if (missing.length > 0) {
+      try {
+        const doc = YAML.parseDocument(fs.readFileSync(userFile, 'utf8'))
+        for (const { path: p, value } of missing) {
+          doc.addIn(p.split('.'), value)
+        }
+        fs.writeFileSync(userFile, String(doc), 'utf8')
+        user = readYaml(userFile)
+        log.mark?.(`[csgo-opener] config/${name}.yaml 自动补齐 ${missing.length} 项新配置: ${missing.map(m => m.path).join(', ')}`)
+      } catch (err) {
+        log.error?.(`[csgo-opener] 自动补齐配置失败: ${err?.message || err}`)
+      }
+    }
+
     this.cache[name]  = _.merge({}, defaults, user)
     this.watch(name, userFile)
     return this.cache[name]
