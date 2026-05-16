@@ -90,15 +90,26 @@ class Config {
   load(name) {
     const userFile    = path.join(USER_DIR, `${name}.yaml`)
     const defaultFile = path.join(DEFAULT_DIR, `${name}.yaml`)
-    const defaults    = readYaml(defaultFile)
-    let user          = readYaml(userFile)
 
-    // 启动时自动把 default 新增字段写入 user 文件，按 default 顺序插入，保留用户原注释
+    // 边界 1：user 文件不存在或空（被用户清空过）→ 直接用 default 覆盖
+    let userText = ''
+    try { userText = fs.readFileSync(userFile, 'utf8') } catch {}
+    if (!userText.trim()) {
+      fs.copyFileSync(defaultFile, userFile)
+      log.mark?.(`[csgo-opener] config/${name}.yaml 为空，已用默认配置重新生成`)
+    }
+
+    const defaults = readYaml(defaultFile)
+    let user       = readYaml(userFile)
+
+    // 启动时自动把 default 新增字段按位置插入 user 文件，保留原注释
     const missing = missingPaths(user, defaults)
     if (missing.length > 0) {
       try {
         const userDoc    = YAML.parseDocument(fs.readFileSync(userFile, 'utf8'))
         const defaultDoc = YAML.parseDocument(fs.readFileSync(defaultFile, 'utf8'))
+        // 边界 2：内容只有注释（contents=null）→ 创建空 Map
+        if (!userDoc.contents) userDoc.contents = userDoc.createNode({})
         const addedPaths = []
         syncOrdered(userDoc.contents, defaultDoc.contents, userDoc.schema, [], addedPaths)
         if (addedPaths.length > 0) {
