@@ -399,16 +399,31 @@ export function drawReveal(ctx, layout, tMs, state) {
   ctx.restore()
 }
 
-/* ---------- 右上角全局用户名水印 ---------- */
+/* ---------- 全局水印 ---------- */
+/* 右上：动态用户昵称（区分视频归属）   底部居中：固定作者署名 */
+const CREDIT_TEXT = 'Trss-Yunzai · csgo-opener-plugin · 冰凉到通透'
+
 export function drawWatermark(ctx, W, H, userName) {
-  if (!userName) return
+  // 右上：动态用户昵称
+  if (userName) {
+    ctx.save()
+    ctx.font = '500 14px "YaHei",sans-serif'
+    ctx.textAlign = 'right'
+    ctx.textBaseline = 'top'
+    ctx.shadowColor = 'rgba(0,0,0,0.85)'
+    ctx.shadowBlur = 6
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'
+    ctx.fillText(userName, W - 16, 12)
+    ctx.restore()
+  }
+  // 底部居中：作者署名（固定）
   ctx.save()
-  ctx.font = '500 14px "YaHei",sans-serif'
-  ctx.textAlign = 'right'
-  ctx.textBaseline = 'top'
-  ctx.shadowColor = 'rgba(0,0,0,0.85)'
+  ctx.font = '500 13px "YaHei",sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'bottom'
+  ctx.shadowColor = 'rgba(0,0,0,0.9)'
   ctx.shadowBlur = 6
-  ctx.fillStyle = 'rgba(255,255,255,0.75)'
-  ctx.fillText(userName, W - 16, 12)
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'
+  ctx.fillText(CREDIT_TEXT, W / 2, H - 8)
   ctx.restore()
 }

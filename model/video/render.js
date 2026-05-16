@@ -152,10 +152,18 @@ export async function renderOpenVideo(drop, caseObj, outPath, opts = {}) {
       drawStrip(ctx, layout, currentX, stripItems, assets, caseObj)
       drawLetterboxAndPointer(ctx, layout, 600)
     } else {
-      ctx.fillStyle = '#000'
-      ctx.fillRect(0, 0, W, layout.LETTERBOX_H)
-      ctx.fillRect(0, H - layout.LETTERBOX_H, W, layout.LETTERBOX_H)
-      drawReveal(ctx, layout, tMs - layout.REVEAL_START_MS, state)
+      const revealT = tMs - layout.REVEAL_START_MS
+      // letterbox 在 reveal 进入的前 700ms 内淡出（与 reveal 缩放进入动画同步）
+      const lbAlpha = Math.max(0, 1 - revealT / 700)
+      if (lbAlpha > 0) {
+        ctx.save()
+        ctx.globalAlpha = lbAlpha
+        ctx.fillStyle = '#000'
+        ctx.fillRect(0, 0, W, layout.LETTERBOX_H)
+        ctx.fillRect(0, H - layout.LETTERBOX_H, W, layout.LETTERBOX_H)
+        ctx.restore()
+      }
+      drawReveal(ctx, layout, revealT, state)
     }
     // 右上角全局水印（盖在所有元素之上）
     drawWatermark(ctx, W, H, userName)

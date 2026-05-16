@@ -161,8 +161,14 @@ export class CsgoOpen extends plugin {
       }
 
       // 引用回复"正在开箱中"提示，15s 后撤回
-      const queueHint = q.inFlight >= q.max ? `（前面 ${q.inFlight + q.pending} 个排队，约 ${(q.inFlight + q.pending) * 8}s 后开始）` : ''
-      const tipRet = await e.reply(`正在开箱：${c.name} ${queueHint}`, true).catch(() => null)
+      // 单次视频生成约 18s（intro+spin+reveal+编码），有排队时叠加
+      const baseSec = 20
+      const ahead = q.inFlight + q.pending  // 我前面还排着几个
+      const waitSec = (ahead + 1) * baseSec
+      const tipRet = await e.reply(
+        `正在开箱：${c.name}\n预计 ${waitSec}s 后送达${ahead > 0 ? `（前面 ${ahead} 个排队中）` : ''}`,
+        true,
+      ).catch(() => null)
       if (tipRet) scheduleRecall(e, tipRet, 15)
 
       await fs.mkdir(TMP_DIR, { recursive: true })

@@ -52,6 +52,9 @@ function applyTpl(html, data) {
 
 import fs from 'node:fs/promises'
 
+/* 全局固定水印（作者标识） */
+export const WATERMARK = 'Trss-Yunzai · csgo-opener-plugin · 冰凉到通透'
+
 export async function renderTpl(tpl, data = {}, opts = {}) {
   const cfg = Config.get().puppeteer || {}
   const width  = opts.width  ?? cfg.width  ?? 1280
@@ -62,7 +65,11 @@ export async function renderTpl(tpl, data = {}, opts = {}) {
   const pluResPath = path.join(PLUGIN_ROOT, 'resources').replace(/\\/g, '/')
   const pluRoot    = PLUGIN_ROOT.replace(/\\/g, '/')
 
-  const enriched = { ...data, pluResPath, pluRoot, pluResUrl: 'file:///' + pluResPath }
+  const enriched = {
+    ...data,
+    pluResPath, pluRoot, pluResUrl: 'file:///' + pluResPath,
+    watermark: WATERMARK,    // 模板里用 {{watermark}}
+  }
 
   const pp = await getPuppeteer()
   if (pp.mode === 'yunzai') {
