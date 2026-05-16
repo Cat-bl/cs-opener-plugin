@@ -37,9 +37,32 @@ export function encodeMP4({
     '-i', 'pipe:0',
   ]
 
+  /* H.264 编码参数（QQ 流畅播放优化）
+   *   -preset medium     比 veryfast 画质好得多，QQ 二次压缩后保留更多细节
+   *   -crf 20            画质略高于默认 23，文件略大但 QQ 不易出色块
+   *   -g {fps}           每秒一个关键帧（默认 250 帧 = 4 秒，seek/缓冲会卡）
+   *   -keyint_min {fps}  避免插入额外关键帧，GOP 稳定
+   *   -sc_threshold 0    关场景切换检测，关键帧严格按 GOP
+   *   -profile:v high    现代手机/QQ 都支持，画质比 main 好
+   *   -level 4.1         60fps 720p 至少需 Level 3.2，4.1 更稳
+   *   -movflags +faststart  把 mp4 元数据移到文件头，QQ 客户端能边下边播
+   */
+  const x264 = [
+    '-c:v', 'libx264',
+    '-preset', 'medium',
+    '-crf', '20',
+    '-g', String(fps),
+    '-keyint_min', String(fps),
+    '-sc_threshold', '0',
+    '-profile:v', 'high',
+    '-level', '4.1',
+    '-pix_fmt', 'yuv420p',
+    '-movflags', '+faststart',
+  ]
+
   let args
   if (noAudio) {
-    args = [...videoIn, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast', outPath]
+    args = [...videoIn, ...x264, outPath]
   } else {
     const WIN_MAP = {
       1: 'case_awarded_0', 2: 'case_awarded_0', 3: 'case_awarded_1',
@@ -66,7 +89,7 @@ export function encodeMP4({
       '-i', drop_a, '-i', kx_a, '-i', win_a,
       '-filter_complex', filter,
       '-map', '0:v', '-map', '[aout]',
-      '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'veryfast',
+      ...x264,
       '-c:a', 'aac', '-b:a', '160k',
       outPath,
     ]
