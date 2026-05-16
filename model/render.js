@@ -15,7 +15,7 @@ import Config from './config.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PLUGIN_ROOT = path.resolve(__dirname, '..')
-const PLUGIN_NAME = 'csgo-opener'
+const PLUGIN_NAME = 'cs-opener'
 
 let _puppeteer = null
 async function getPuppeteer() {
@@ -53,7 +53,7 @@ function applyTpl(html, data) {
 import fs from 'node:fs/promises'
 
 /* 全局固定水印（作者标识） */
-export const WATERMARK = 'Trss-Yunzai · csgo-opener-plugin · 冰凉到通透'
+export const WATERMARK = 'Trss-Yunzai · cs-opener-plugin · 冰凉到通透'
 
 export async function renderTpl(tpl, data = {}, opts = {}) {
   const cfg = Config.get().puppeteer || {}

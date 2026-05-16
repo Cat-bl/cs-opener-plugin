@@ -1,4 +1,4 @@
-# CSGO 开箱模拟器 配置（保存即热更新，无需重启）
+# CS 开箱模拟器 配置（保存即热更新，无需重启）
 
 # 新用户初始金币
 initialCoins: 10000
@@ -45,7 +45,7 @@ cooldown:
   checkin: 1  # 签到
   inv: 1      # 仓库
 
-# 资源下载（#csgo 更新数据 / node tools/download_skins.mjs 走这里）
+# 资源下载（#cs 更新数据 / node tools/download_skins.mjs 走这里）
 download:
   # HTTP/HTTPS 代理；空字符串 = 直连
   # 优先级：此配置 > 环境变量 HTTPS_PROXY / HTTP_PROXY

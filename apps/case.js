@@ -18,12 +18,12 @@ function oddsForDisplay(caseObj) {
 export class CsgoCaseDetail extends plugin {
   constructor() {
     super({
-      name: 'CSGO箱子详情',
+      name: 'CS箱子详情',
       dsc: '查看单个箱子的全部物品和概率',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(看|查看|详情)\\s*(.+)$', fnc: 'detail' },
+        { reg: '^#?\\s*cs\\s*(看|查看|详情)\\s*(.+)$', fnc: 'detail' },
       ],
     })
   }
@@ -32,11 +32,11 @@ export class CsgoCaseDetail extends plugin {
     const cd = checkCooldown('case', e.user_id)
     if (cd) { await e.reply(`详情冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
-    const m = e.msg.match(/^#?\s*csgo\s*(?:看|查看|详情)\s*(.+)$/)
+    const m = e.msg.match(/^#?\s*cs\s*(?:看|查看|详情)\s*(.+)$/)
     const name = (m && m[1] || '').trim()
     const c = findCaseByName(name)
     if (!c) {
-      await e.reply(`找不到箱子「${name}」\n试试 #csgo 商城 看完整列表\n名字支持包含匹配，例如「反冲」即可匹配「反冲武器箱」`)
+      await e.reply(`找不到箱子「${name}」\n试试 #cs 商城 看完整列表\n名字支持包含匹配，例如「反冲」即可匹配「反冲武器箱」`)
       return true
     }
 

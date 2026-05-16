@@ -7,19 +7,19 @@ import { renderInventoryCard, userNickname } from '../model/html_helpers.js'
 export class CsgoInventory extends plugin {
   constructor() {
     super({
-      name: 'CSGO仓库',
-      dsc: 'CS:GO 仓库 / 出售',
+      name: 'CS仓库',
+      dsc: 'CS 仓库 / 出售',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(仓库|库存)(\\s+(.+))?$', fnc: 'inv' },
-        { reg: '^#?\\s*csgo\\s*出售\\s*(.+)$',           fnc: 'sell' },
+        { reg: '^#?\\s*cs\\s*(仓库|库存)(\\s+(.+))?$', fnc: 'inv' },
+        { reg: '^#?\\s*cs\\s*出售\\s*(.+)$',           fnc: 'sell' },
       ],
     })
   }
 
   async inv(e) {
-    const m = e.msg.match(/^#?\s*csgo\s*(?:仓库|库存)(?:\s+(.+))?$/)
+    const m = e.msg.match(/^#?\s*cs\s*(?:仓库|库存)(?:\s+(.+))?$/)
     const arg = (m && m[1] || '').trim()
 
     let filterNum = null
@@ -39,7 +39,7 @@ export class CsgoInventory extends plugin {
 
     const contentHtml = items.length
       ? `<div class="inv-grid">${items.map(renderInventoryCard).join('')}</div>`
-      : `<div class="inv-empty"><div class="inv-empty-title">仓库空空如也</div><div>试试 #csgo 开箱 反冲武器箱</div></div>`
+      : `<div class="inv-empty"><div class="inv-empty-title">仓库空空如也</div><div>试试 #cs 开箱 反冲武器箱</div></div>`
 
     const rows = Math.ceil(items.length / 6)
     const height = Math.max(720, 180 + rows * 220)
@@ -56,7 +56,7 @@ export class CsgoInventory extends plugin {
   }
 
   async sell(e) {
-    const m = e.msg.match(/^#?\s*csgo\s*出售\s*(.+)$/)
+    const m = e.msg.match(/^#?\s*cs\s*出售\s*(.+)$/)
     const arg = (m && m[1] || '').trim()
 
     // 批量出售：「全部」/「全部 [品质]」
@@ -81,7 +81,7 @@ export class CsgoInventory extends plugin {
 
     // 单件出售：按 uid 前缀
     if (arg.length < 4) {
-      await e.reply('请提供 uid 至少前 4 位（仓库图里每个物品下方有 6 位 uid 标识）\n或用 #csgo 出售 全部 / #csgo 出售 全部 蓝')
+      await e.reply('请提供 uid 至少前 4 位（仓库图里每个物品下方有 6 位 uid 标识）\n或用 #cs 出售 全部 / #cs 出售 全部 蓝')
       return true
     }
     const r = await Store.sellByPrefix(e.user_id, arg)

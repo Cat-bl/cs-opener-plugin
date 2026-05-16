@@ -16,15 +16,15 @@ function formatOdds(odds) {
 export class CsgoSettings extends plugin {
   constructor() {
     super({
-      name: 'CSGO概率',
-      dsc: 'CS:GO 概率查看 / 设置（设置仅主人）/ 重置存档',
+      name: 'CS概率',
+      dsc: 'CS 概率查看 / 设置（设置仅主人）/ 重置存档',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(概率|当前概率)$',                       fnc: 'show' },
-        { reg: '^#?\\s*csgo\\s*概率预设\\s*(.+)$',                       fnc: 'preset' },
-        { reg: '^#?\\s*csgo\\s*设置概率\\s*(\\S+)\\s+(\\d+)$',           fnc: 'setOne' },
-        { reg: '^#?\\s*csgo\\s*重置(存档)?$',                            fnc: 'reset' },
+        { reg: '^#?\\s*cs\\s*(概率|当前概率)$',                       fnc: 'show' },
+        { reg: '^#?\\s*cs\\s*概率预设\\s*(.+)$',                       fnc: 'preset' },
+        { reg: '^#?\\s*cs\\s*设置概率\\s*(\\S+)\\s+(\\d+)$',           fnc: 'setOne' },
+        { reg: '^#?\\s*cs\\s*重置(存档)?$',                            fnc: 'reset' },
       ],
     })
   }
@@ -34,8 +34,8 @@ export class CsgoSettings extends plugin {
     const odds = getDefaultOdds()
     await e.reply(
       `【当前开箱概率】（全局，仅主人可改）\n${formatOdds(odds)}\n\n` +
-      `主人命令：#csgo 概率预设 [默认/欧皇/极品/均匀/残酷]\n` +
-      `         #csgo 设置概率 [档] [万分比]`
+      `主人命令：#cs 概率预设 [默认/欧皇/极品/均匀/残酷]\n` +
+      `         #cs 设置概率 [档] [万分比]`
     )
     return true
   }
@@ -43,7 +43,7 @@ export class CsgoSettings extends plugin {
   /* 仅主人：切预设并保存到 config.yaml */
   async preset(e) {
     if (!e.isMaster) { await e.reply('概率设置仅主人可用'); return true }
-    const m = e.msg.match(/^#?\s*csgo\s*概率预设\s*(.+)$/)
+    const m = e.msg.match(/^#?\s*cs\s*概率预设\s*(.+)$/)
     const name = (m && m[1] || '').trim()
     const key = PRESET_ALIAS[name] || PRESET_ALIAS[name.toLowerCase()]
     if (!key) {
@@ -60,7 +60,7 @@ export class CsgoSettings extends plugin {
   /* 仅主人：调单档并保存 */
   async setOne(e) {
     if (!e.isMaster) { await e.reply('概率设置仅主人可用'); return true }
-    const m = e.msg.match(/^#?\s*csgo\s*设置概率\s*(\S+)\s+(\d+)$/)
+    const m = e.msg.match(/^#?\s*cs\s*设置概率\s*(\S+)\s+(\d+)$/)
     const tierStr = m[1]
     const val = parseInt(m[2], 10)
     const num = rarityNumFromAlias(tierStr)
@@ -90,7 +90,7 @@ export class CsgoSettings extends plugin {
       setTimeout(() => {
         if (RESET_PENDING.get(e.user_id) === now) RESET_PENDING.delete(e.user_id)
       }, 60_000).unref?.()
-      await e.reply('⚠️ 这将清空你的全部金币、库存、开箱记录（不可恢复）\n如确认，请在 60 秒内再发一次 #csgo 重置存档')
+      await e.reply('⚠️ 这将清空你的全部金币、库存、开箱记录（不可恢复）\n如确认，请在 60 秒内再发一次 #cs 重置存档')
     }
     return true
   }

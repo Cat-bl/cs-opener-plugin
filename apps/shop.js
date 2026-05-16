@@ -7,12 +7,12 @@ import { checkCooldown } from '../model/cooldown.js'
 export class CsgoShop extends plugin {
   constructor() {
     super({
-      name: 'CSGO商城',
-      dsc: 'CS:GO 商城（按类别查看箱子）',
+      name: 'CS商城',
+      dsc: 'CS 商城（按类别查看箱子）',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*商城(\\s+(.+))?$', fnc: 'shop' },
+        { reg: '^#?\\s*cs\\s*商城(\\s+(.+))?$', fnc: 'shop' },
       ],
     })
   }
@@ -21,7 +21,7 @@ export class CsgoShop extends plugin {
     const cd = checkCooldown('shop', e.user_id)
     if (cd) { await e.reply(`商城冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
-    const m = e.msg.match(/^#?\s*csgo\s*商城(?:\s+(.+))?$/)
+    const m = e.msg.match(/^#?\s*cs\s*商城(?:\s+(.+))?$/)
     const arg = (m && m[1] || '').trim()
 
     let cat

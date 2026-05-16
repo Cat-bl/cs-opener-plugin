@@ -34,7 +34,7 @@ function initial() {
       statTrakByNum: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
     },
     odds: null,                  // 已废弃（保留兼容旧存档）
-    lastCase: null,              // 上次开的箱子名（用于「#csgo 开箱」无参数时默认）
+    lastCase: null,              // 上次开的箱子名（用于「#cs 开箱」无参数时默认）
     lastCheckin: null,           // 上次签到日期 'YYYY-M-D'（CST）
   }
 }

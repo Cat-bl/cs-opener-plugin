@@ -4,12 +4,12 @@ import { renderTpl } from '../model/render.js'
 export class CsgoHelp extends plugin {
   constructor() {
     super({
-      name: 'CSGO帮助',
-      dsc: 'CS:GO 开箱命令列表',
+      name: 'CS帮助',
+      dsc: 'CS 开箱命令列表',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo(\\s*(帮助|help))?$', fnc: 'help' },
+        { reg: '^#?\\s*cs(\\s*(帮助|help))?$', fnc: 'help' },
       ],
     })
   }

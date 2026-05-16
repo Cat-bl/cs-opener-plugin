@@ -401,7 +401,7 @@ export function drawReveal(ctx, layout, tMs, state) {
 
 /* ---------- 全局水印 ---------- */
 /* 右上：动态用户昵称（区分视频归属）   底部居中：固定作者署名 */
-const CREDIT_TEXT = 'Trss-Yunzai · csgo-opener-plugin · 冰凉到通透'
+const CREDIT_TEXT = 'Trss-Yunzai · cs-opener-plugin · 冰凉到通透'
 
 export function drawWatermark(ctx, W, H, userName) {
   // 右上：动态用户昵称

@@ -7,12 +7,12 @@ import { renderHistRow, userNickname, formatDate } from '../model/html_helpers.j
 export class CsgoHistory extends plugin {
   constructor() {
     super({
-      name: 'CSGO记录',
-      dsc: 'CS:GO 开箱历史 + 品质分布',
+      name: 'CS记录',
+      dsc: 'CS 开箱历史 + 品质分布',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(记录|历史|统计)$', fnc: 'hist' },
+        { reg: '^#?\\s*cs\\s*(记录|历史|统计)$', fnc: 'hist' },
       ],
     })
   }

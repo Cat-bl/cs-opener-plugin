@@ -162,7 +162,7 @@ export async function ensureDataReady(e) {
     return true
   } catch (err) {
     if (err && err.code === 'ENOENT') {
-      await e.reply('数据未初始化，请主人先发 #csgo 更新数据 下载箱子图片（约 600MB）')
+      await e.reply('数据未初始化，请主人先发 #cs 更新数据 下载箱子图片（约 600MB）')
     } else {
       await e.reply(`数据加载失败: ${err?.message || err}`)
     }

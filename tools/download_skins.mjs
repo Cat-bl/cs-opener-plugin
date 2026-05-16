@@ -7,7 +7,7 @@
  * 结果：assets/skins/{crates,items}/*.png
  * 中断可重跑，已存在文件自动跳过。
  *
- * 在 QQ 中也可用 `#csgo 更新数据`（仅主人可执行）触发同一流程。
+ * 在 QQ 中也可用 `#cs 更新数据`（仅主人可执行）触发同一流程。
  */
 
 import { downloadAll } from '../model/downloader.js'

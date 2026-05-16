@@ -1,6 +1,6 @@
 /* 插件自更新（git pull）
  *
- *   #csgo更新    从 git 仓库拉取最新代码
+ *   #cs更新    从 git 仓库拉取最新代码
  */
 
 import plugin from '../../../lib/plugins/plugin.js'
@@ -14,12 +14,12 @@ const PLUGIN_ROOT = path.resolve(__dirname, '..')
 export class CsgoUpdate extends plugin {
   constructor() {
     super({
-      name: 'CSGO更新',
-      dsc: 'CS:GO 开箱插件自更新',
+      name: 'CS更新',
+      dsc: 'CS 开箱插件自更新',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(插件)?\\s*更新$', fnc: 'update' },
+        { reg: '^#?\\s*cs\\s*(插件)?\\s*更新$', fnc: 'update' },
       ],
     })
   }

@@ -153,15 +153,18 @@ export async function renderOpenVideo(drop, caseObj, outPath, opts = {}) {
       drawLetterboxAndPointer(ctx, layout, 600)
     } else {
       const revealT = tMs - layout.REVEAL_START_MS
-      // letterbox 在 reveal 进入的前 700ms 内淡出（与 reveal 缩放进入动画同步）
-      const lbAlpha = Math.max(0, 1 - revealT / 700)
-      if (lbAlpha > 0) {
-        ctx.save()
-        ctx.globalAlpha = lbAlpha
+      // letterbox 出场：与进场镜像对称 —— 进场用 EASE_OUT(t) 从屏外滑入，
+      // 出场用 EASE_OUT(1-t) 从位置滑回屏外（顶部向上、底部向下），700ms 完成
+      const LBH = layout.LETTERBOX_H
+      const dur = 700
+      if (revealT < dur) {
+        const inv = 1 - revealT / dur            // 1 → 0
+        const lbEase = EASE_OUT(inv)             // 1 → 0
         ctx.fillStyle = '#000'
-        ctx.fillRect(0, 0, W, layout.LETTERBOX_H)
-        ctx.fillRect(0, H - layout.LETTERBOX_H, W, layout.LETTERBOX_H)
-        ctx.restore()
+        // 顶部：进场 y = -LBH*(1-ease)；出场反着播放仍是这个公式
+        ctx.fillRect(0, -LBH * (1 - lbEase), W, LBH)
+        // 底部：进场 y = H-LBH + LBH*(1-ease)
+        ctx.fillRect(0, H - LBH + LBH * (1 - lbEase), W, LBH)
       }
       drawReveal(ctx, layout, revealT, state)
     }

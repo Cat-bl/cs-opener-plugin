@@ -28,12 +28,12 @@ function nowCST() {
 export class CsgoCheckin extends plugin {
   constructor() {
     super({
-      name: 'CSGO签到',
-      dsc: 'CS:GO 每日签到（金币）',
+      name: 'CS签到',
+      dsc: 'CS 每日签到（金币）',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*csgo\\s*(签到|报到|每日)$', fnc: 'checkin' },
+        { reg: '^#?\\s*cs\\s*(签到|报到|每日)$', fnc: 'checkin' },
       ],
     })
   }
@@ -76,7 +76,7 @@ export class CsgoCheckin extends plugin {
         <div class="rarest-card">
           <div class="rarest-text">
             <div class="rarest-label">最稀有掉落</div>
-            <div class="rarest-name" style="color:rgba(255,255,255,.5);font-size:16px">还没开过箱 · 发 #csgo 开箱 试试</div>
+            <div class="rarest-name" style="color:rgba(255,255,255,.5);font-size:16px">还没开过箱 · 发 #cs 开箱 试试</div>
           </div>
         </div>
       `

@@ -43,7 +43,7 @@ async function pfetch(url, init = {}) {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PLUGIN_ROOT = path.resolve(__dirname, '..')
-const CRATES_URL  = 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/zh-CN/crates.json'
+const CRATES_URL  = 'https://raw.githubusercontent.com/ByMykel/CS-API/main/public/api/zh-CN/crates.json'
 const DATA_DIR    = path.join(PLUGIN_ROOT, 'assets', 'data')
 const CACHE_JSON  = path.join(DATA_DIR, 'crates.json')
 const CACHE_JS    = path.join(DATA_DIR, 'crates.js')
@@ -81,7 +81,7 @@ async function loadCrates({ forceRemote = false, onLog }) {
     onLog?.(`[json] 已写入 ${CACHE_JSON}`)
   }
   // 同时写 JS 包装版（兼容老网页版离线加载，删除网页版后此文件可忽略）
-  const jsWrap = `/* 由 model/downloader.js 生成 */\nwindow.__CSGO_CRATES__ = ${txt};\n`
+  const jsWrap = `/* 由 model/downloader.js 生成 */\nwindow.__CS_CRATES__ = ${txt};\n`
   await fs.writeFile(CACHE_JS, jsWrap, 'utf8')
   return JSON.parse(txt)
 }

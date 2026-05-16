@@ -67,13 +67,13 @@ function acquireSlot() {
 export class CsgoOpen extends plugin {
   constructor() {
     super({
-      name: 'CSGO开箱',
-      dsc: 'CS:GO 模拟开箱（视频）',
+      name: 'CS开箱',
+      dsc: 'CS 模拟开箱（视频）',
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#?\\s*(?:csgo\\s*)?开箱\\s*(.*)$',           fnc: 'open'     },
-        { reg: '^#?\\s*(?:csgo\\s*)?(选箱|默认箱)\\s*(.*)$', fnc: 'pickCase' },
+        { reg: '^#?\\s*(?:cs\\s*)?开箱\\s*(.*)$',           fnc: 'open'     },
+        { reg: '^#?\\s*(?:cs\\s*)?(选箱|默认箱)\\s*(.*)$', fnc: 'pickCase' },
       ],
     })
   }
@@ -81,22 +81,22 @@ export class CsgoOpen extends plugin {
   /* 只切换默认箱（不开箱、不扣金币）；无参数 = 查看当前 */
   async pickCase(e) {
     if (!(await ensureDataReady(e))) return true
-    const m = e.msg.match(/^#?\s*(?:csgo\s*)?(?:选箱|默认箱)\s*(.*)$/)
+    const m = e.msg.match(/^#?\s*(?:cs\s*)?(?:选箱|默认箱)\s*(.*)$/)
     const argName = (m && m[1] || '').trim()
 
     if (!argName) {
       const user = await Store.get(e.user_id)
       const cur = user.lastCase || '（未设置，默认开第一个武器箱）'
-      await e.reply(`当前默认开箱: ${cur}\n用 #csgo 选箱 [箱名] 切换`)
+      await e.reply(`当前默认开箱: ${cur}\n用 #cs 选箱 [箱名] 切换`)
       return true
     }
     const c = findCaseByName(argName)
     if (!c) {
-      await e.reply(`找不到箱子「${argName}」\n试试 #csgo 商城 看完整列表`)
+      await e.reply(`找不到箱子「${argName}」\n试试 #cs 商城 看完整列表`)
       return true
     }
     await Store.update(e.user_id, d => { d.lastCase = c.name })
-    await e.reply(`✅ 默认箱已设为「${c.name}」(${c.price}金币/次)，之后 #csgo 开箱 直接开它`)
+    await e.reply(`✅ 默认箱已设为「${c.name}」(${c.price}金币/次)，之后 #cs 开箱 直接开它`)
     return true
   }
 
@@ -110,7 +110,7 @@ export class CsgoOpen extends plugin {
     const cd = checkCooldown('open', e.user_id)
     if (cd) { await e.reply(`开箱冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
-    const m = e.msg.match(/^#?\s*(?:csgo\s*)?开箱\s*(.*)$/)
+    const m = e.msg.match(/^#?\s*(?:cs\s*)?开箱\s*(.*)$/)
     const argName = (m && m[1] || '').trim()
 
     // 决定箱子：参数 > 上次开的 > 默认第一个武器箱
@@ -118,7 +118,7 @@ export class CsgoOpen extends plugin {
     if (argName) {
       c = findCaseByName(argName)
       if (!c) {
-        await e.reply(`找不到箱子「${argName}」\n试试 #csgo 商城 看完整列表\n名字支持包含匹配，例如「反冲」即可匹配「反冲武器箱」`)
+        await e.reply(`找不到箱子「${argName}」\n试试 #cs 商城 看完整列表\n名字支持包含匹配，例如「反冲」即可匹配「反冲武器箱」`)
         return true
       }
     } else {
@@ -127,7 +127,7 @@ export class CsgoOpen extends plugin {
       if (!c) {
         const all = getCases()
         c = all.find(x => x.category === 'weapon_case') || all[0]
-        if (!c) { await e.reply('暂无可用箱子，请先 #csgo 更新数据'); return true }
+        if (!c) { await e.reply('暂无可用箱子，请先 #cs 更新数据'); return true }
       }
     }
 
