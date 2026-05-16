@@ -468,7 +468,7 @@ body { width: 1280px; min-height: 720px; }
 <body>
 <div class="view">
   <div class="user-bar">
-    <div class="user-name">{{userName}} 的仓库 {{filterLabel}}</div>
+    <div class="user-name">{{userName}} 的仓库 {{@ filterLabel}}</div>
     <div class="user-coins"><span class="coin-icon">¥</span> {{coins}}</div>
   </div>
 
@@ -479,7 +479,7 @@ body { width: 1280px; min-height: 720px; }
     </div>
   </div>
 
-  {{contentHtml}}
+  {{@ contentHtml}}
 </div>
 </body>
 </html>

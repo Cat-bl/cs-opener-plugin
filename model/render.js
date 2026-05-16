@@ -41,9 +41,10 @@ async function getPuppeteer() {
   throw new Error('未找到 puppeteer：Yunzai 环境需挂在 plugins/，本地需 npm i -D puppeteer')
 }
 
-/* 简易模板替换：{{key}} 直接字符串注入（不做 HTML 转义；调用方需保证已 escape） */
+/* 简易模板替换：兼容 art-template 的 {{key}} 与 {{@ key}}（@ = 原样输出）
+ * 本 standalone 替换器对两种语法等价（都原样注入；调用方需自行 escape 标量） */
 function applyTpl(html, data) {
-  return html.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, key) => {
+  return html.replace(/\{\{\s*@?\s*([\w.]+)\s*\}\}/g, (m, key) => {
     const v = key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), data)
     return v == null ? '' : String(v)
   })
