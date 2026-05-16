@@ -166,7 +166,7 @@ export class CsgoOpen extends plugin {
       const ahead = q.inFlight + q.pending  // 我前面还排着几个
       const waitSec = (ahead + 1) * baseSec
       const tipRet = await e.reply(
-        `正在开箱：${c.name}\n预计 ${waitSec}s 后送达${ahead > 0 ? `（前面 ${ahead} 个排队中）` : ''}`,
+        `开箱动画渲染中：${c.name}\n预计 ${waitSec}s 后送达${ahead > 0 ? `（前面 ${ahead} 个排队中）` : ''}`,
         true,
       ).catch(() => null)
       if (tipRet) scheduleRecall(e, tipRet, 15)
