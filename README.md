@@ -51,39 +51,17 @@
 | **ffmpeg** | 必须在系统 PATH（`ffmpeg -version` 能跑） |
 | 中文字体 | Linux 服务器装 `fonts-noto-cjk`，否则视频/截图里中文是豆腐 |
 
-ffmpeg 安装：
-- Ubuntu / Debian：`sudo apt install ffmpeg fonts-noto-cjk`
-- CentOS / RHEL：`sudo dnf install ffmpeg google-noto-cjk-fonts`
-- Windows：从 [ffmpeg.org](https://ffmpeg.org/download.html) 下载静态版，把 `bin` 加入 PATH
-- Mac：`brew install ffmpeg`
-
-也可以不入 PATH，启动 Yunzai 前设环境变量：
+在Yunzai根目录下执行：
 
 ```bash
-export FFMPEG=/path/to/ffmpeg
+git clone --depth=1 https://github.com/Cat-bl/csgo-opener-plugin plugins/csgo-openerener-plugin
+cd plugins/csgo-opener-plugin
+pnpm install
 ```
 
-### 2. 拷入 Yunzai
-
-```bash
-cd TRSS-Yunzai/plugins/
-git clone <repo-url> csgo-opener
-# 或解压压缩包到 plugins/csgo-opener/
-cd csgo-opener
-npm install
-```
-
-### 3. 启动 Yunzai
-
-```bash
-cd TRSS-Yunzai
-npm start
-```
-
-控制台看到 `[csgo-opener] 插件加载完成` 即 OK。
 首次启动会自动从 `config_default/config.yaml` 拷贝一份到 `config/config.yaml`。
 
-### 4. 配置代理（国内必看）
+### 2. 配置代理（国内必看）
 
 11000+ 张图从 GitHub raw + Steam CDN 拉，**国内不开代理基本下不动**。
 Node 18+ 内置 fetch 不读 `HTTP_PROXY` 环境变量，必须在 `config/config.yaml` 里显式配：
@@ -97,11 +75,7 @@ download:
   retry: 3
 ```
 
-也支持环境变量 `HTTPS_PROXY` / `HTTP_PROXY`（优先级：config > env）。
-
-保存即热更新。
-
-### 5. 下载箱图/物品图（一次性，约 600MB）
+### 3. 下载箱图/物品图（一次性，约 600MB）
 
 **推荐：在 QQ 里发命令**（主人专属）：
 
@@ -122,9 +96,8 @@ node tools/download_skins.mjs
 
 - 10 并发，约 20–60 分钟（视代理速度）
 - 中断了再跑，已下载的文件会自动跳过
-- CLI 用户跑完需要重启 Yunzai 让插件刷新（QQ 命令则自动刷新）
 
-### 6. 试一下
+### 4. 试一下
 
 QQ 私聊或群里发：
 
@@ -250,7 +223,7 @@ csgo-opener/
 - **数据**：[ByMykel/CSGO-API](https://github.com/ByMykel/CSGO-API) — 箱子/物品/品质元数据
 - **音效**：CS:GO 客户端原版
 - **图片**：Steam CDN
-- **框架**：[TRSS-Yunzai](https://github.com/TimeRainStarSky/Yunzai)、参考 [undercover-plugin](https://github.com/Cat-bl/undercover-plugin) 配置模式
+- **框架**：[TRSS-Yunzai](https://github.com/TimeRainStarSky/Yunzai)
 
 ---
 
