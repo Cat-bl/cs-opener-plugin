@@ -13,9 +13,40 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PLUGIN_ROOT = path.resolve(__dirname, '..')
 const TMP_DIR = path.join(PLUGIN_ROOT, 'data', 'tmp')
 
-/* 并发闸：同时最多 N 个视频生成（CPU/内存上限）；超过 maxPending 直接拒绝 */
+/* 启动时清扫遗留 tmp（上次进程崩溃没清的 mp4） */
+;(async () => {
+  try {
+    await fs.mkdir(TMP_DIR, { recursive: true })
+    const files = await fs.readdir(TMP_DIR)
+    let cleaned = 0
+    for (const f of files) {
+      if (f.startsWith('open_') && f.endsWith('.mp4')) {
+        await fs.unlink(path.join(TMP_DIR, f)).catch(() => {})
+        cleaned++
+      }
+    }
+    if (cleaned > 0) console.log(`[csgo-opener] 清扫遗留视频 ${cleaned} 个`)
+  } catch {}
+})()
+
+/* 同一用户同时只能开 1 个箱（避免重复扣费/排队混乱） */
+const openingUsers = new Set()
+
+/* 全局并发闸：同时最多 N 个视频生成（CPU/内存上限）；超过 maxPending 直接拒绝 */
 let inFlight = 0
 const pending = []
+
+/* 撤回消息辅助：私聊/群聊都支持，N 秒后撤回 */
+function scheduleRecall(e, msgRet, sec = 15) {
+  if (!msgRet?.message_id) return
+  setTimeout(() => {
+    try {
+      if (e.group?.recallMsg) e.group.recallMsg(msgRet.message_id).catch(() => {})
+      else if (e.friend?.recallMsg) e.friend.recallMsg(msgRet.message_id).catch(() => {})
+      else if (e.bot?.recallMsg) e.bot.recallMsg(msgRet.message_id).catch(() => {})
+    } catch {}
+  }, sec * 1000)
+}
 
 function queueStatus() {
   const cfg = Config.get().video || {}
@@ -70,6 +101,12 @@ export class CsgoOpen extends plugin {
   }
 
   async open(e) {
+    // 每用户互斥：上次开箱还在跑就拒绝
+    if (openingUsers.has(e.user_id)) {
+      await e.reply('你上一次开箱还在进行中，等开完再发哦~', true)
+      return true
+    }
+
     const cd = checkCooldown('open', e.user_id)
     if (cd) { await e.reply(`开箱冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
@@ -94,55 +131,66 @@ export class CsgoOpen extends plugin {
       }
     }
 
-    // 扣金币 + 抽奖 + 写入库存 + 记 lastCase（全部串行，避免并发争抢同一存档）
-    const result = await Store.update(e.user_id, d => {
-      if (d.coins < c.price) return { ok: false, msg: `金币不足，需要 ${c.price}（当前 ${d.coins}）` }
-      d.coins -= c.price
-      const drop = rollDrop(c, null)   // 始终用全局概率（config.defaultOdds，主人可改）
-      d.inventory.unshift(drop)
-      d.history.unshift(drop)
-      d.stats.opened += 1
-      d.stats.byNum[drop.rarityNum] = (d.stats.byNum[drop.rarityNum] || 0) + 1
-      if (drop.isStatTrak) {
-        d.stats.statTrakByNum[drop.rarityNum] = (d.stats.statTrakByNum[drop.rarityNum] || 0) + 1
+    // 锁住该用户（在金币校验前，避免重复扣费）
+    openingUsers.add(e.user_id)
+    try {
+      // 扣金币 + 抽奖 + 写入库存 + 记 lastCase（全部串行，避免并发争抢同一存档）
+      const result = await Store.update(e.user_id, d => {
+        if (d.coins < c.price) return { ok: false, msg: `金币不足，需要 ${c.price}（当前 ${d.coins}）` }
+        d.coins -= c.price
+        const drop = rollDrop(c, null)   // 始终用全局概率（config.defaultOdds，主人可改）
+        d.inventory.unshift(drop)
+        d.history.unshift(drop)
+        d.stats.opened += 1
+        d.stats.byNum[drop.rarityNum] = (d.stats.byNum[drop.rarityNum] || 0) + 1
+        if (drop.isStatTrak) {
+          d.stats.statTrakByNum[drop.rarityNum] = (d.stats.statTrakByNum[drop.rarityNum] || 0) + 1
+        }
+        d.lastCase = c.name
+        return { ok: true, drop, coins: d.coins }
+      })
+      if (!result.ok) { await e.reply(result.msg); return true }
+
+      // 全局并发闸：满了/排队/无压力 三档处理
+      const q = queueStatus()
+      if (q.pending >= q.maxPending) {
+        // 队列爆满：退款 + 拒绝
+        await Store.update(e.user_id, d => { d.coins += c.price; d.inventory.shift(); d.history.shift(); d.stats.opened -= 1; d.stats.byNum[result.drop.rarityNum]-- })
+        await e.reply(`⚠️ 服务器繁忙（${q.inFlight} 个开箱进行中 + ${q.pending} 个排队，已达上限），金币已退还，请稍后再试`)
+        return true
       }
-      d.lastCase = c.name
-      return { ok: true, drop, coins: d.coins }
-    })
-    if (!result.ok) { await e.reply(result.msg); return true }
 
-    // 并发闸：满了/排队/无压力 三档处理
-    const q = queueStatus()
-    if (q.pending >= q.maxPending) {
-      // 队列爆满：退款 + 拒绝
-      await Store.update(e.user_id, d => { d.coins += c.price; d.inventory.shift(); d.history.shift(); d.stats.opened -= 1; d.stats.byNum[result.drop.rarityNum]-- })
-      await e.reply(`⚠️ 服务器繁忙（${q.inFlight} 个开箱进行中 + ${q.pending} 个排队，已达上限），金币已退还，请稍后再试`)
-      return true
-    }
-    if (q.inFlight >= q.max) {
-      // 需要排队：先通知
-      await e.reply(`视频正在排队（前面 ${q.inFlight + q.pending} 个），预计 ${(q.inFlight + q.pending) * 8}s 后开始...`)
-    }
+      // 引用回复"正在开箱中"提示，15s 后撤回
+      const queueHint = q.inFlight >= q.max ? `（前面 ${q.inFlight + q.pending} 个排队，约 ${(q.inFlight + q.pending) * 8}s 后开始）` : ''
+      const tipRet = await e.reply(`正在开箱：${c.name} ${queueHint}`, true).catch(() => null)
+      if (tipRet) scheduleRecall(e, tipRet, 15)
 
-    await fs.mkdir(TMP_DIR, { recursive: true })
-    const outPath = path.join(TMP_DIR, `open_${e.user_id}_${Date.now()}.mp4`)
+      await fs.mkdir(TMP_DIR, { recursive: true })
+      const outPath = path.join(TMP_DIR, `open_${e.user_id}_${Date.now()}.mp4`)
+      const cleanup = () => fs.unlink(outPath).catch(() => {})
 
-    const release = await acquireSlot()
-    try {
-      await renderOpenVideo(result.drop, c, outPath)
-    } catch (err) {
+      const release = await acquireSlot()
+      try {
+        await renderOpenVideo(result.drop, c, outPath)
+      } catch (err) {
+        release()
+        await cleanup()   // 立即删可能写了一半的文件
+        await e.reply(`视频生成失败: ${err?.message || err}`)
+        return true
+      }
       release()
-      await e.reply(`视频生成失败: ${err?.message || err}`)
-      return true
-    }
-    release()
 
-    try {
-      await e.reply(segment.video(outPath))
+      try {
+        await e.reply(segment.video(outPath))
+        // 成功：给 QQ 留下载时间，60s 后删
+        setTimeout(cleanup, 60000)
+      } catch (err) {
+        await cleanup()   // 发送失败也立即删
+        await e.reply(`视频发送失败: ${err?.message || err}`)
+      }
+      return true
     } finally {
-      // 60s 后清理临时文件
-      setTimeout(() => fs.unlink(outPath).catch(() => {}), 60000)
+      openingUsers.delete(e.user_id)
     }
-    return true
   }
 }

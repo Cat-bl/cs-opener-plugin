@@ -73,10 +73,22 @@ export function encodeMP4({
 
   return new Promise(async (resolve, reject) => {
     let ff
-    try { ff = spawn(FFMPEG, args, { stdio: ['pipe', 'inherit', 'inherit'] }) }
+    // stdout 完全丢弃；stderr 仅缓存最后 ~10KB，正常退出不打印，出错时给主进程看
+    try { ff = spawn(FFMPEG, args, { stdio: ['pipe', 'ignore', 'pipe'] }) }
     catch (e) { return reject(e) }
+
+    let errBuf = ''
+    ff.stderr.on('data', d => {
+      errBuf += d
+      if (errBuf.length > 10240) errBuf = errBuf.slice(-8192)
+    })
     ff.on('error', reject)
-    ff.on('exit', code => code === 0 ? resolve(outPath) : reject(new Error('ffmpeg exit ' + code)))
+    ff.on('exit', code => {
+      if (code === 0) return resolve(outPath)
+      const tail = errBuf.split('\n').slice(-12).join('\n')
+      console.error('[csgo-opener] ffmpeg 失败 (exit ' + code + '):\n' + tail)
+      reject(new Error('ffmpeg exit ' + code))
+    })
 
     try {
       for await (const buf of frameSource) {
