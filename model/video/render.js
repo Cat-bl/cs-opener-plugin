@@ -27,7 +27,7 @@ const WINNER_INDEX = 26
 
 function buildLayout(W, H, REVEAL_MS, introItemCount, baseIntroMs = 2000) {
   const TRANSITION_MS    = 350
-  const SPIN_DURATION_MS = 8000   // 6s→8s：峰值速度从 ~3000px/s 降到 ~2200px/s，QQ 压缩对高速运动更友好
+  const SPIN_DURATION_MS = 6000
 
   const SPIN_ITEM_H      = 294
   const SPIN_ITEM_W      = Math.round(SPIN_ITEM_H / 0.733)  // 401

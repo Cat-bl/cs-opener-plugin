@@ -76,11 +76,10 @@ export function encodeMP4({
     const KX_AT   = introMs + transitionMs
     const WIN_AT  = KX_AT + spinDurMs
 
-    // 滚动嘀嘀声: 循环填满 spin 时长（spinDurMs/1000 秒），硬切到中奖音
-    const spinSec = (spinDurMs / 1000).toFixed(2)
+    // 滚动嘀嘀声: 截前 6 秒(对应 spin 时长)，硬切到中奖音，不做淡出
     const filter =
       `[1:a]adelay=${DROP_AT}|${DROP_AT},volume=0.6[a1];` +
-      `[2:a]aloop=loop=-1:size=2e+9,atrim=0:${spinSec},adelay=${KX_AT}|${KX_AT},volume=1.0[a2];` +
+      `[2:a]atrim=0:6,adelay=${KX_AT}|${KX_AT},volume=1.0[a2];` +
       `[3:a]adelay=${WIN_AT}|${WIN_AT},volume=1.0[a3];` +
       `[a1][a2][a3]amix=inputs=3:duration=longest:dropout_transition=0:normalize=0,` +
       `apad=whole_dur=${totalMs}ms[aout]`
