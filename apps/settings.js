@@ -20,10 +20,10 @@ export class CsgoSettings extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo\\s*(概率|我的概率)$',                       fnc: 'show' },
-        { reg: '^#csgo\\s*概率预设\\s*(.+)$',                       fnc: 'preset' },
-        { reg: '^#csgo\\s*设置概率\\s*(\\S+)\\s+(\\d+)$',           fnc: 'setOne' },
-        { reg: '^#csgo\\s*重置(存档|存档)?$',                       fnc: 'reset' },
+        { reg: '^#?\\s*csgo\\s*(概率|我的概率)$',                       fnc: 'show' },
+        { reg: '^#?\\s*csgo\\s*概率预设\\s*(.+)$',                       fnc: 'preset' },
+        { reg: '^#?\\s*csgo\\s*设置概率\\s*(\\S+)\\s+(\\d+)$',           fnc: 'setOne' },
+        { reg: '^#?\\s*csgo\\s*重置(存档|存档)?$',                       fnc: 'reset' },
       ],
     })
   }
@@ -40,7 +40,7 @@ export class CsgoSettings extends plugin {
   }
 
   async preset(e) {
-    const m = e.msg.match(/^#csgo\s*概率预设\s*(.+)$/)
+    const m = e.msg.match(/^#?\s*csgo\s*概率预设\s*(.+)$/)
     const name = (m && m[1] || '').trim()
     const key = PRESET_ALIAS[name] || PRESET_ALIAS[name.toLowerCase()]
     if (!key) {
@@ -54,7 +54,7 @@ export class CsgoSettings extends plugin {
   }
 
   async setOne(e) {
-    const m = e.msg.match(/^#csgo\s*设置概率\s*(\S+)\s+(\d+)$/)
+    const m = e.msg.match(/^#?\s*csgo\s*设置概率\s*(\S+)\s+(\d+)$/)
     const tierStr = m[1]
     const val = parseInt(m[2], 10)
     const num = rarityNumFromAlias(tierStr)

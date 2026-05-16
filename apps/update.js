@@ -19,7 +19,7 @@ export class CsgoUpdate extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo(插件)?更新$', fnc: 'update' },
+        { reg: '^#?\\s*csgo\\s*(插件)?\\s*更新$', fnc: 'update' },
       ],
     })
   }

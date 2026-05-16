@@ -12,7 +12,7 @@ export class CsgoHistory extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo\\s*(记录|历史|统计)$', fnc: 'hist' },
+        { reg: '^#?\\s*csgo\\s*(记录|历史|统计)$', fnc: 'hist' },
       ],
     })
   }

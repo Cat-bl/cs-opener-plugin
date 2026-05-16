@@ -3,116 +3,205 @@
 <head>
 <meta charset="UTF-8">
 <title>CS:GO 开箱 帮助</title>
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="../css/layout.css">
 <style>
-body { width: 1280px; min-height: 720px; }
-.help-wrap {
-  padding: 40px 60px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 1280px;
+  min-height: 720px;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: #e6e6e6;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(217,153,50,.18), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(75,105,255,.10), transparent 70%),
+    linear-gradient(135deg, #0e1419 0%, #1a2330 50%, #0e1419 100%);
 }
-.help-title {
-  font-size: 32px;
+
+.wrap { padding: 48px 64px; position: relative; }
+
+/* 标题 */
+.title-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(217,153,50,.3);
+  margin-bottom: 32px;
+}
+.title {
+  font-size: 38px;
   font-weight: 900;
-  color: #fff;
   letter-spacing: 6px;
-  margin-bottom: 6px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.7);
+  color: #fff;
+  text-shadow: 0 0 24px rgba(217,153,50,.5);
 }
-.help-title .accent { color: var(--accent-glow); }
-.help-subtitle {
-  font-size: 14px;
-  color: var(--text-2);
-  margin-bottom: 28px;
-  letter-spacing: 2px;
+.title .cs { color: #fff; }
+.title .colon { color: #f2b03c; margin: 0 2px; }
+.title .go { color: #f2b03c; text-shadow: 0 0 20px rgba(242,176,60,.8); }
+.title .sub { font-size: 18px; font-weight: 300; letter-spacing: 8px; color: #b4b9bf; margin-left: 16px; }
+
+.title-hint {
+  text-align: right;
+  font-size: 12px;
+  color: #7a8089;
+  line-height: 1.8;
+  letter-spacing: 1px;
 }
-.help-grid {
+.title-hint b { color: #f2b03c; font-weight: 500; }
+
+/* 卡片网格 */
+.grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 18px 36px;
+  gap: 22px;
 }
-.help-section {
-  background: linear-gradient(180deg, #1d242d, #161b22);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 18px 22px;
+
+.section {
+  background: linear-gradient(180deg, rgba(40,48,60,.6), rgba(20,26,34,.85));
+  border: 1px solid rgba(217,153,50,.25);
+  border-radius: 6px;
+  padding: 22px 26px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
 }
-.help-section h3 {
-  color: var(--accent-glow);
-  font-size: 16px;
-  letter-spacing: 2px;
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, #f2b03c 0%, transparent 100%);
 }
-.help-row {
+.section h3 {
   display: flex;
-  align-items: baseline;
-  gap: 14px;
-  padding: 5px 0;
-  font-size: 13px;
-}
-.help-cmd {
-  color: #fff;
-  font-family: Consolas, "Microsoft YaHei", monospace;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
   font-weight: 700;
-  background: rgba(0,0,0,.4);
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid rgba(255,255,255,.08);
-  white-space: nowrap;
-  flex-shrink: 0;
-  letter-spacing: 0;
-}
-.help-desc {
-  color: var(--text-1);
-  flex: 1;
-  line-height: 1.5;
-}
-.help-footer {
-  margin-top: 28px;
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 12px;
+  color: #f2b03c;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(255,255,255,.12);
   letter-spacing: 2px;
 }
+.section h3::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: #f2b03c;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(242,176,60,.8);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 7px 0;
+}
+.row + .row { border-top: 1px dotted rgba(255,255,255,.06); }
+
+.cmd {
+  display: inline-block;
+  flex-shrink: 0;
+  min-width: 170px;
+  padding: 5px 12px;
+  background: linear-gradient(180deg, rgba(242,176,60,.18), rgba(217,153,50,.08));
+  border: 1px solid rgba(242,176,60,.5);
+  color: #ffd97a;
+  font-family: Consolas, "Cascadia Code", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 3px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.desc {
+  flex: 1;
+  font-size: 13px;
+  color: #d0d4da;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+}
+
+/* 管理员区块 */
+.admin h3 { color: #eb4b4b; }
+.admin h3::before { background: #eb4b4b; box-shadow: 0 0 8px rgba(235,75,75,.7); }
+.admin { border-color: rgba(235,75,75,.3); }
+.admin::before { background: linear-gradient(180deg, #eb4b4b 0%, transparent 100%); }
+.admin .cmd { background: linear-gradient(180deg, rgba(235,75,75,.15), rgba(180,40,40,.08)); border-color: rgba(235,75,75,.5); color: #ff9090; }
+
+/* 底部 */
+.footer {
+  margin-top: 36px;
+  padding-top: 16px;
+  text-align: center;
+  font-size: 11px;
+  color: #555c66;
+  letter-spacing: 3px;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.footer .accent { color: #d99932; }
 </style>
 </head>
 <body>
-<div class="help-wrap">
-  <h1 class="help-title">CS<span class="accent">:</span>GO 模拟开箱 帮助</h1>
-  <div class="help-subtitle">所有命令以 # 开头</div>
+<div class="wrap">
 
-  <div class="help-grid">
-    <div class="help-section">
-      <h3>商城 / 开箱</h3>
-      <div class="help-row"><span class="help-cmd">#csgo 商城</span><span class="help-desc">默认看武器箱列表</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 商城 印花胶囊</span><span class="help-desc">按类别查看（武器箱/纪念包/印花胶囊/签名胶囊/布章包/胸章胶囊/涂鸦箱/音乐盒集/高光纪念包）</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 看 反冲武器箱</span><span class="help-desc">查看单个箱子详情（含全部物品和概率）</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 开箱 反冲武器箱</span><span class="help-desc">开一次箱（视频，约 14 秒）</span></div>
+  <div class="title-bar">
+    <div class="title">
+      <span class="cs">CS</span><span class="colon">:</span><span class="go">GO</span>
+      <span class="sub">模拟开箱 · 帮助</span>
     </div>
-
-    <div class="help-section">
-      <h3>仓库 / 出售</h3>
-      <div class="help-row"><span class="help-cmd">#csgo 仓库</span><span class="help-desc">查看自己全部库存</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 仓库 红</span><span class="help-desc">按品质筛选（白/浅蓝/蓝/紫/粉/红/金/暗金）</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 出售 abc123</span><span class="help-desc">出售物品（uid 前 6 位）</span></div>
-    </div>
-
-    <div class="help-section">
-      <h3>记录 / 统计</h3>
-      <div class="help-row"><span class="help-cmd">#csgo 记录</span><span class="help-desc">查看开箱历史 + 品质分布 + 最稀有掉落</span></div>
-    </div>
-
-    <div class="help-section">
-      <h3>概率 / 设置</h3>
-      <div class="help-row"><span class="help-cmd">#csgo 概率</span><span class="help-desc">查看当前概率设置</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 概率预设 欧皇</span><span class="help-desc">切预设（默认/欧皇/极品/均匀/残酷）</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 设置概率 红 1000</span><span class="help-desc">调整某档概率（万分比；档位别名同上）</span></div>
-      <div class="help-row"><span class="help-cmd">#csgo 重置存档</span><span class="help-desc">清空个人数据（不可恢复）</span></div>
+    <div class="title-hint">
+      <b>#</b> 可省略 · 命令与参数之间空格也可省<br>
+      例：<b>#csgo 开箱</b> = <b>csgo开箱</b> = <b>开箱</b> (无)
     </div>
   </div>
 
-  <div class="help-footer">CS:GO Opener Plugin · 数据源 ByMykel/CSGO-API</div>
+  <div class="grid">
+    <div class="section">
+      <h3>商城 / 开箱</h3>
+      <div class="row"><span class="cmd">#csgo 商城</span><span class="desc">默认显示武器箱列表</span></div>
+      <div class="row"><span class="cmd">#csgo 商城 [类别]</span><span class="desc">类别可选：武器箱 / 纪念包 / 高光纪念包 / 印花胶囊 / 签名胶囊 / 布章包 / 胸章胶囊 / 涂鸦箱 / 音乐盒集</span></div>
+      <div class="row"><span class="cmd">#csgo 看 [箱名]</span><span class="desc">查看箱子详情（含全部物品 + 概率）</span></div>
+      <div class="row"><span class="cmd">#csgo 开箱</span><span class="desc">开你的默认箱（视频）。从未设置过 = 第一个武器箱</span></div>
+      <div class="row"><span class="cmd">#csgo 开箱 [箱名]</span><span class="desc">直接开指定箱子，同时记忆为默认</span></div>
+      <div class="row"><span class="cmd">#csgo 选箱 [箱名]</span><span class="desc">只切换默认箱不开箱（不花钱）。不带名 = 查看当前默认</span></div>
+    </div>
+
+    <div class="section">
+      <h3>仓库 / 出售</h3>
+      <div class="row"><span class="cmd">#csgo 仓库</span><span class="desc">查看自己全部库存</span></div>
+      <div class="row"><span class="cmd">#csgo 仓库 [品质]</span><span class="desc">品质：白 / 浅蓝 / 蓝 / 紫 / 粉 / 红 / 金 / 暗金</span></div>
+      <div class="row"><span class="cmd">#csgo 出售 [uid前6位]</span><span class="desc">出售物品换金币</span></div>
+    </div>
+
+    <div class="section">
+      <h3>记录 / 统计</h3>
+      <div class="row"><span class="cmd">#csgo 记录</span><span class="desc">开箱历史 + 品质分布柱状图 + 最稀有掉落</span></div>
+    </div>
+
+    <div class="section">
+      <h3>概率 / 设置</h3>
+      <div class="row"><span class="cmd">#csgo 概率</span><span class="desc">查看当前掉率设置</span></div>
+      <div class="row"><span class="cmd">#csgo 概率预设 [名]</span><span class="desc">预设：默认 / 欧皇 / 极品 / 均匀 / 残酷</span></div>
+      <div class="row"><span class="cmd">#csgo 设置概率 [档] [万分比]</span><span class="desc">单档调整。档：蓝 / 紫 / 粉 / 红 / 金</span></div>
+      <div class="row"><span class="cmd">#csgo 重置存档</span><span class="desc">清空个人数据（不可恢复）</span></div>
+    </div>
+
+    <div class="section admin">
+      <h3>主人专属</h3>
+      <div class="row"><span class="cmd">#csgo 更新数据</span><span class="desc">增量下载箱图/物品图（首次必跑，约 5–60 分钟）</span></div>
+      <div class="row"><span class="cmd">#csgo 更新数据 强制</span><span class="desc">重拉 crates.json 再下载（新箱出现时用）</span></div>
+      <div class="row"><span class="cmd">#csgo 状态</span><span class="desc">查看下载任务实时进度</span></div>
+      <div class="row"><span class="cmd">#csgo 更新</span><span class="desc">从 git 仓库拉最新插件代码</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    CS<span class="accent">:</span>GO OPENER PLUGIN · 数据源 ByMykel/CSGO-API
+  </div>
+
 </div>
 </body>
 </html>

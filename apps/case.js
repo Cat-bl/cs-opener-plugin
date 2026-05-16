@@ -1,6 +1,6 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import { renderTpl } from '../model/render.js'
-import { loadCases, findCaseByName } from '../model/data.js'
+import { ensureDataReady, findCaseByName } from '../model/data.js'
 import { RARITY, geometricOdds, getDefaultOdds, RARITY_NUMS_ASC } from '../model/rarity.js'
 import { renderDetailItem, fileUrl, randomBgUrl, pickGoldImageUrl, escapeHtml } from '../model/html_helpers.js'
 
@@ -22,14 +22,14 @@ export class CsgoCaseDetail extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo\\s*(看|查看|详情)\\s*(.+)$', fnc: 'detail' },
+        { reg: '^#?\\s*csgo\\s*(看|查看|详情)\\s*(.+)$', fnc: 'detail' },
       ],
     })
   }
 
   async detail(e) {
-    await loadCases()
-    const m = e.msg.match(/^#csgo\s*(?:看|查看|详情)\s*(.+)$/)
+    if (!(await ensureDataReady(e))) return true
+    const m = e.msg.match(/^#?\s*csgo\s*(?:看|查看|详情)\s*(.+)$/)
     const name = (m && m[1] || '').trim()
     const c = findCaseByName(name)
     if (!c) {

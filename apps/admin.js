@@ -21,8 +21,8 @@ export class CsgoAdmin extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo\\s*更新数据(\\s+强制)?$', fnc: 'updateData' },
-        { reg: '^#csgo\\s*状态$',                 fnc: 'status' },
+        { reg: '^#?\\s*csgo\\s*更新数据(\\s+强制)?$', fnc: 'updateData' },
+        { reg: '^#?\\s*csgo\\s*状态$',                 fnc: 'status' },
       ],
     })
   }

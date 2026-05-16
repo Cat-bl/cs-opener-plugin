@@ -12,14 +12,14 @@ export class CsgoInventory extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo\\s*(仓库|库存)(\\s+(.+))?$', fnc: 'inv' },
-        { reg: '^#csgo\\s*出售\\s*(.+)$',           fnc: 'sell' },
+        { reg: '^#?\\s*csgo\\s*(仓库|库存)(\\s+(.+))?$', fnc: 'inv' },
+        { reg: '^#?\\s*csgo\\s*出售\\s*(.+)$',           fnc: 'sell' },
       ],
     })
   }
 
   async inv(e) {
-    const m = e.msg.match(/^#csgo\s*(?:仓库|库存)(?:\s+(.+))?$/)
+    const m = e.msg.match(/^#?\s*csgo\s*(?:仓库|库存)(?:\s+(.+))?$/)
     const arg = (m && m[1] || '').trim()
 
     let filterNum = null
@@ -56,7 +56,7 @@ export class CsgoInventory extends plugin {
   }
 
   async sell(e) {
-    const m = e.msg.match(/^#csgo\s*出售\s*(.+)$/)
+    const m = e.msg.match(/^#?\s*csgo\s*出售\s*(.+)$/)
     const prefix = (m && m[1] || '').trim()
     if (!prefix || prefix.length < 4) { await e.reply('请提供 uid 至少前 4 位'); return true }
 

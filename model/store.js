@@ -34,6 +34,7 @@ function initial() {
       statTrakByNum: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
     },
     odds: null,
+    lastCase: null,    // 上次开的箱子名（用于「#csgo 开箱」无参数时默认）
   }
 }
 

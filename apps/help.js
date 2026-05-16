@@ -9,7 +9,7 @@ export class CsgoHelp extends plugin {
       event: 'message',
       priority: 5000,
       rule: [
-        { reg: '^#csgo(\\s*(帮助|help))?$', fnc: 'help' },
+        { reg: '^#?\\s*csgo(\\s*(帮助|help))?$', fnc: 'help' },
       ],
     })
   }

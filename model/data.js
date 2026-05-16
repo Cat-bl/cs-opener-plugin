@@ -155,6 +155,21 @@ export async function reloadCases() {
   return CASES.length
 }
 
+/* apps 入口统一调用：确保数据已加载。失败时回执友好提示，返回 false */
+export async function ensureDataReady(e) {
+  try {
+    await loadCases()
+    return true
+  } catch (err) {
+    if (err && err.code === 'ENOENT') {
+      await e.reply('数据未初始化，请主人先发 #csgo 更新数据 下载箱子图片（约 600MB）')
+    } else {
+      await e.reply(`数据加载失败: ${err?.message || err}`)
+    }
+    return false
+  }
+}
+
 export function getCases() { return CASES }
 export function getCase(id) { return CASES.find(c => c.id === id) }
 export function getCasesByCategory(key) { return CASES.filter(c => c.category === key) }
