@@ -36,20 +36,13 @@ export class CsgoAdmin extends plugin {
     const force = /强制/.test(e.msg)
     await e.reply(`开始增量下载箱图/物品图${force ? '（强制重拉 crates.json）' : ''}。约 5–60 分钟（看网速/代理），完成后会通知您。期间可发 #cs 状态 查进度。`)
 
-    running = { startAt: Date.now(), lastReport: Date.now(), latest: null, e }
+    running = { startAt: Date.now(), latest: null, e }
     downloadAll({
       forceRemote: force,
       concurrency: 10,
       onLog: msg => log.mark?.(`[csgo-opener] ${msg}`),
-      onProgress: p => {
-        running.latest = p
-        // 每 60s 主动向命令发起者推一次（避免刷屏；用户也能用 #cs 状态 主动拉）
-        if (Date.now() - running.lastReport >= 60_000) {
-          running.lastReport = Date.now()
-          e.reply(`进度: ${p.done}/${p.total} (${p.percent}%) · 新增 ${p.okNew} · 已存 ${p.okSkip} · 失败 ${p.fail} · 已下 ${(p.bytes/1024/1024).toFixed(1)}MB`)
-            .catch(() => {})
-        }
-      },
+      // 只更新内存里的最新进度，不主动推送；用户用 #cs 状态 主动拉
+      onProgress: p => { running.latest = p },
     }).then(async sum => {
       const sec = (sum.elapsedMs / 1000).toFixed(1)
       let reloadMsg = ''
