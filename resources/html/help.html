@@ -143,6 +143,19 @@ html, body {
 }
 .footer .accent { color: #d99932; }
 </style>
+<style>
+/* 让图片在手机黑底背景上有明显边界 */
+body { position: relative; }
+body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  border: 3px solid rgba(242,176,60,.6);
+  box-shadow: inset 0 0 32px rgba(242,176,60,.15);
+  z-index: 9999;
+}
+</style>
 </head>
 <body>
 <div class="wrap">
