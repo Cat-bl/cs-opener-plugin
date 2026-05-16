@@ -54,7 +54,7 @@
 在Yunzai根目录下执行：
 
 ```bash
-git clone --depth=1 https://github.com/Cat-bl/csgo-opener-plugin plugins/csgo-openerener-plugin
+git clone --depth=1 https://github.com/Cat-bl/csgo-opener-plugin plugins/csgo-opener-plugin
 cd plugins/csgo-opener-plugin
 pnpm install
 ```
