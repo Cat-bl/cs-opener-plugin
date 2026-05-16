@@ -30,7 +30,7 @@ function readYaml(file) {
   }
 }
 
-/* 递归找 default 里有、user 里没有的 leaf path */
+/* 递归找 default 里有、user 里没有的 leaf path（仅用于检测） */
 function missingPaths(user, defaults, prefix = '') {
   const result = []
   for (const [k, dv] of Object.entries(defaults || {})) {
@@ -43,6 +43,40 @@ function missingPaths(user, defaults, prefix = '') {
     }
   }
   return result
+}
+
+/* AST 级递归同步：把 default 中 user 没有的 Pair 按 default 顺序 splice 进 user
+ * 通过克隆 default 的 Pair 保留默认值的子结构和行内注释 */
+function syncOrdered(userMap, defaultMap, schema, prefix, addedPaths) {
+  if (!userMap?.items || !defaultMap?.items) return
+  const userKeyIdx = key => userMap.items.findIndex(p => String(p.key) === key)
+
+  for (let i = 0; i < defaultMap.items.length; i++) {
+    const defPair = defaultMap.items[i]
+    const key = String(defPair.key)
+    const fullPath = [...prefix, key].join('.')
+
+    if (userKeyIdx(key) < 0) {
+      // 找 default 上一个字段在 user 中的位置作为插入锚点
+      let insertIdx = 0
+      for (let j = i - 1; j >= 0; j--) {
+        const prevKey = String(defaultMap.items[j].key)
+        const idx = userKeyIdx(prevKey)
+        if (idx >= 0) { insertIdx = idx + 1; break }
+      }
+      // 克隆 default 整个 Pair（含子结构 + 注释）
+      const newPair = defPair.clone(schema)
+      userMap.items.splice(insertIdx, 0, newPair)
+      addedPaths.push(fullPath)
+    } else {
+      // 已存在；若是 Map 递归
+      const idx = userKeyIdx(key)
+      const userVal = userMap.items[idx].value
+      if (defPair.value?.items && userVal?.items) {
+        syncOrdered(userVal, defPair.value, schema, [...prefix, key], addedPaths)
+      }
+    }
+  }
 }
 
 class Config {
@@ -59,17 +93,19 @@ class Config {
     const defaults    = readYaml(defaultFile)
     let user          = readYaml(userFile)
 
-    // 启动时自动把 default 新增字段写入 user 文件（保留原注释和已有改动）
+    // 启动时自动把 default 新增字段写入 user 文件，按 default 顺序插入，保留用户原注释
     const missing = missingPaths(user, defaults)
     if (missing.length > 0) {
       try {
-        const doc = YAML.parseDocument(fs.readFileSync(userFile, 'utf8'))
-        for (const { path: p, value } of missing) {
-          doc.addIn(p.split('.'), value)
+        const userDoc    = YAML.parseDocument(fs.readFileSync(userFile, 'utf8'))
+        const defaultDoc = YAML.parseDocument(fs.readFileSync(defaultFile, 'utf8'))
+        const addedPaths = []
+        syncOrdered(userDoc.contents, defaultDoc.contents, userDoc.schema, [], addedPaths)
+        if (addedPaths.length > 0) {
+          fs.writeFileSync(userFile, String(userDoc), 'utf8')
+          user = readYaml(userFile)
+          log.mark?.(`[csgo-opener] config/${name}.yaml 自动补齐 ${addedPaths.length} 项新配置: ${addedPaths.join(', ')}`)
         }
-        fs.writeFileSync(userFile, String(doc), 'utf8')
-        user = readYaml(userFile)
-        log.mark?.(`[csgo-opener] config/${name}.yaml 自动补齐 ${missing.length} 项新配置: ${missing.map(m => m.path).join(', ')}`)
       } catch (err) {
         log.error?.(`[csgo-opener] 自动补齐配置失败: ${err?.message || err}`)
       }
