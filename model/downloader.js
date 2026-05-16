@@ -43,7 +43,17 @@ async function pfetch(url, init = {}) {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PLUGIN_ROOT = path.resolve(__dirname, '..')
-const CRATES_URL  = 'https://raw.githubusercontent.com/ByMykel/CS-API/main/public/api/zh-CN/crates.json'
+/* ByMykel 的真实仓库名仍是 CSGO-API（CS2 时代未改名）
+ * 多镜像 fallback 顺序：国内 CDN/代理 → GitHub 原始（最后兜底）
+ * 通常国内首条就成；如果有自己的代理走 download.proxy 配置，所有镜像都通过代理重试 */
+const CRATES_URLS = [
+  'https://fastly.jsdelivr.net/gh/ByMykel/CSGO-API@main/public/api/zh-CN/crates.json',
+  'https://cdn.jsdelivr.net/gh/ByMykel/CSGO-API@main/public/api/zh-CN/crates.json',
+  'https://gcore.jsdelivr.net/gh/ByMykel/CSGO-API@main/public/api/zh-CN/crates.json',
+  'https://mirror.ghproxy.com/https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/zh-CN/crates.json',
+  'https://ghproxy.net/https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/zh-CN/crates.json',
+  'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/zh-CN/crates.json',
+]
 const DATA_DIR    = path.join(PLUGIN_ROOT, 'assets', 'data')
 const CACHE_JSON  = path.join(DATA_DIR, 'crates.json')
 const CACHE_JS    = path.join(DATA_DIR, 'crates.js')
@@ -74,9 +84,20 @@ async function loadCrates({ forceRemote = false, onLog }) {
   }
   if (!txt) {
     onLog?.('[json] 拉取 crates.json ...')
-    const resp = await pfetch(CRATES_URL)
-    if (!resp.ok) throw new Error('crates.json 拉取失败 HTTP ' + resp.status)
-    txt = await resp.text()
+    const errs = []
+    for (const url of CRATES_URLS) {
+      try {
+        onLog?.(`[json] try ${url}`)
+        const resp = await pfetch(url)
+        if (!resp.ok) { errs.push(`${url} → HTTP ${resp.status}`); continue }
+        txt = await resp.text()
+        onLog?.(`[json] 成功 (${(txt.length/1024).toFixed(0)} KB)`)
+        break
+      } catch (err) {
+        errs.push(`${url} → ${err?.message || err}`)
+      }
+    }
+    if (!txt) throw new Error('crates.json 全部镜像失败:\n  ' + errs.join('\n  '))
     await fs.writeFile(CACHE_JSON, txt, 'utf8')
     onLog?.(`[json] 已写入 ${CACHE_JSON}`)
   }

@@ -44,7 +44,7 @@ export class CsgoShop extends plugin {
       caseCount: cases.length,
       ts: formatDate(Date.now()),
       cardsHtml,
-    }, { width: 1280, height: Math.max(720, 230 + Math.ceil(cases.length / 5) * 230) })
+    }, { width: 720, height: Math.max(720, 230 + Math.ceil(cases.length / 5) * 230) })
     await e.reply(img)
     return true
   }

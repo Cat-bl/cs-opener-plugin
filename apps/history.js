@@ -81,7 +81,7 @@ export class CsgoHistory extends plugin {
       ts: formatDate(Date.now()),
       statsHtml,
       rowsHtml,
-    }, { width: 1280, height })
+    }, { width: 720, height })
     await e.reply(img)
     return true
   }

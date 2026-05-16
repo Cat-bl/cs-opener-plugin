@@ -6,8 +6,8 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
-  width: 1280px;
-  min-height: 720px;
+  width: 720px;
+  
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   color: #e6e6e6;
   background:
@@ -16,53 +16,47 @@ html, body {
     linear-gradient(135deg, #0e1419 0%, #1a2330 50%, #0e1419 100%);
 }
 
-.wrap { padding: 48px 64px; position: relative; }
+.wrap { padding: 28px 24px; position: relative; }
 
-/* 标题 */
+/* 标题（竖屏纵向） */
 .title-bar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding-bottom: 20px;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(217,153,50,.3);
-  margin-bottom: 32px;
+  margin-bottom: 22px;
 }
 .title {
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 4px;
   color: #fff;
   text-shadow: 0 0 24px rgba(217,153,50,.5);
+  margin-bottom: 8px;
 }
-.title .cs { color: #fff; }
-.title .colon { color: #f2b03c; margin: 0 2px; }
-.title .go { color: #f2b03c; text-shadow: 0 0 20px rgba(242,176,60,.8); }
-.title .sub { font-size: 18px; font-weight: 300; letter-spacing: 8px; color: #b4b9bf; margin-left: 16px; }
+.title .cs { color: #f2b03c; }
+.title .sub { font-size: 16px; font-weight: 300; letter-spacing: 4px; color: #b4b9bf; margin-left: 8px; }
 
 .title-hint {
-  text-align: right;
-  font-size: 12px;
+  font-size: 13px;
   color: #7a8089;
-  line-height: 1.8;
+  line-height: 1.7;
   letter-spacing: 1px;
 }
-.title-hint b { color: #f2b03c; font-weight: 500; }
+.title-hint b { color: #f2b03c; font-weight: 600; }
 
-/* 卡片网格 */
+/* 卡片：单列堆叠 */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .section {
   background: linear-gradient(180deg, rgba(40,48,60,.6), rgba(20,26,34,.85));
   border: 1px solid rgba(217,153,50,.25);
-  border-radius: 6px;
-  padding: 22px 26px;
+  border-radius: 8px;
+  padding: 18px 20px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(8px);
 }
 .section::before {
   content: '';
@@ -75,10 +69,10 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #f2b03c;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding-bottom: 10px;
   border-bottom: 1px dashed rgba(255,255,255,.12);
   letter-spacing: 2px;
@@ -91,37 +85,34 @@ html, body {
   box-shadow: 0 0 8px rgba(242,176,60,.8);
 }
 
+/* 命令行：竖屏改纵向，命令在上、描述在下 */
 .row {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 7px 0;
+  padding: 8px 0;
 }
 .row + .row { border-top: 1px dotted rgba(255,255,255,.06); }
 
 .cmd {
   display: inline-block;
-  flex-shrink: 0;
-  min-width: 170px;
   padding: 5px 12px;
   background: linear-gradient(180deg, rgba(242,176,60,.18), rgba(217,153,50,.08));
   border: 1px solid rgba(242,176,60,.5);
   color: #ffd97a;
   font-family: Consolas, "Cascadia Code", monospace;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 3px;
   letter-spacing: 0;
-  white-space: nowrap;
+  margin-bottom: 6px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
 }
 
 .desc {
-  flex: 1;
+  display: block;
   font-size: 13px;
   color: #d0d4da;
   line-height: 1.6;
   letter-spacing: 0.5px;
+  padding-left: 4px;
 }
 
 /* 管理员区块 */

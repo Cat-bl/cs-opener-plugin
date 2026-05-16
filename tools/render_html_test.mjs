@@ -24,7 +24,7 @@ async function main() {
 
   // 1) help
   console.log('[1/5] help.html')
-  await renderToFile('help', {}, path.join(OUT, '01_help.png'), { width: 1280, height: 720 })
+  await renderToFile('help', {}, path.join(OUT, '01_help.png'), { width: 720, height: 720 })
 
   // 2) shop（武器箱类别）
   console.log('[2/5] shop.html')
@@ -34,7 +34,7 @@ async function main() {
     caseCount: wcases.length,
     ts: formatDate(Date.now()),
     cardsHtml: wcases.map(renderCaseCard).join(''),
-  }, path.join(OUT, '02_shop.png'), { width: 1280, height: 1100 })
+  }, path.join(OUT, '02_shop.png'), { width: 720, height: 1100 })
 
   // 3) case-detail（反冲武器箱）
   console.log('[3/5] case-detail.html')
@@ -61,7 +61,7 @@ async function main() {
       itemsHtml: items.join(''),
       itemsTotal: items.length,
       oddsHtml,
-    }, path.join(OUT, '03_case_detail.png'), { width: 1280, height: 1080 })
+    }, path.join(OUT, '03_case_detail.png'), { width: 720, height: 1080 })
   }
 
   // 4) inventory（先开 5 次造点数据）
@@ -84,7 +84,7 @@ async function main() {
     coins: data.coins,
     count: data.inventory.length,
     contentHtml: `<div class="inv-grid">${data.inventory.map(renderInventoryCard).join('')}</div>`,
-  }, path.join(OUT, '04_inventory.png'), { width: 1280, height: 720 })
+  }, path.join(OUT, '04_inventory.png'), { width: 720, height: 720 })
 
   // 5) history
   console.log('[5/5] history.html')
@@ -130,7 +130,7 @@ async function main() {
     ts: formatDate(Date.now()),
     statsHtml,
     rowsHtml: data.history.map(renderHistRow).join(''),
-  }, path.join(OUT, '05_history.png'), { width: 1280, height: 720 })
+  }, path.join(OUT, '05_history.png'), { width: 720, height: 720 })
 
   // 清理测试存档
   await fs.unlink(path.resolve(__dirname, '..', 'data', 'users', TEST_UID + '.json')).catch(() => {})

@@ -75,7 +75,7 @@ export class CsgoCaseDetail extends plugin {
       itemsHtml: items.join(''),
       itemsTotal,
       oddsHtml,
-    }, { width: 1280, height: 1080 })  // 详情页较长，放大高度
+    }, { width: 720, height: 1080 })  // 详情页较长，放大高度
     await e.reply(img)
     return true
   }

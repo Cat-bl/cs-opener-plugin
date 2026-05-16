@@ -50,7 +50,7 @@ export class CsgoInventory extends plugin {
       coins: data.coins,
       count: items.length,
       contentHtml,
-    }, { width: 1280, height })
+    }, { width: 720, height })
     await e.reply(img)
     return true
   }
