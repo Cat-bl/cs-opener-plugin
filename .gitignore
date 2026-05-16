@@ -3,6 +3,19 @@ assets/skins/
 assets/data/crates.json
 assets/data/crates.js
 
+# 插件运行时数据（用户存档 + 视频临时输出）
+data/
+
+# Yunzai 启动时自动从 config_default/ 拷贝；用户改动不入 git
+config/
+
+# 本地开发用的 ffmpeg 静态构建（593MB），生产用 Yunzai 环境 ffmpeg
+tools/ffmpeg/
+
+# 本地视觉调试输出
+out*.mp4
+_check/
+
 # OS
 .DS_Store
 Thumbs.db

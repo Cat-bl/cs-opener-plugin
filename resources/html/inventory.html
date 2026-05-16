@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{userName}} 的仓库</title>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/inventory.css">
+<style>
+body { width: 1280px; min-height: 720px; }
+.view { padding: 24px 32px; }
+</style>
+</head>
+<body>
+<div class="view">
+  <div class="user-bar">
+    <div class="user-name">{{userName}} 的仓库 {{filterLabel}}</div>
+    <div class="user-coins"><span class="coin-icon">¥</span> {{coins}}</div>
+  </div>
+
+  <div class="view-header">
+    <div>
+      <div class="view-title">共 {{count}} 件物品</div>
+      <div class="view-subtitle">提示：#csgo 出售 [uid前6位]</div>
+    </div>
+  </div>
+
+  {{contentHtml}}
+</div>
+</body>
+</html>

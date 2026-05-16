@@ -1,0 +1,202 @@
+/* ========== 单箱详情页（puppeteer 截图，无动画） ==========
+ * 仅保留 case-detail.html 所需样式，开箱动画/滚动/reveal 走视频
+ */
+
+/* CS 地图背景 */
+.cs-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(2px);
+  transform: scale(1.05);
+}
+.cs-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 50%, rgba(0,0,0,.7));
+}
+
+.case-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* 标题 */
+.case-title-h1 {
+  text-align: center;
+  color: rgb(218,219,224);
+  font-size: var(--title-fs);
+  font-weight: 300;
+  letter-spacing: 6px;
+  margin: 30px 0 0 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,.7);
+}
+.unlock-text {
+  text-align: center;
+  color: rgb(205,205,205);
+  font-size: var(--subtitle-fs);
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 6px 0 0;
+  padding: 0 16px;
+}
+.unlock-text b { font-weight: 700; }
+
+/* 箱子大图 */
+.case-img-div {
+  height: calc(var(--case-img-h) + 20px);
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+.case-img-div img {
+  max-height: var(--case-img-h);
+  max-width: 90%;
+  width: auto;
+  filter:
+    drop-shadow(0 6px 16px rgba(0,0,0,.7))
+    drop-shadow(0 0 30px rgba(255,200,80,.2));
+}
+
+/* 物品列表 */
+#case-d {
+  flex: 1;
+  margin: 0 var(--view-pad-x);
+  padding-bottom: 30px;
+}
+#case-d > p {
+  color: rgb(236,235,240);
+  font-size: 13px;
+  letter-spacing: 1px;
+  margin: 4px 0;
+}
+#case-d hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,.15);
+  margin: 4px 0 10px;
+}
+#case-d ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--drop-item-w), 1fr));
+  gap: 12px 12px;
+}
+#case-d ol li {
+  position: relative;
+  list-style: none;
+  display: block;
+  margin: 0;
+  height: calc(var(--drop-item-h) + 40px);
+  width: 100%;
+}
+.media-body { margin-top: 4px; }
+.media-body b {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+.media-body p {
+  margin: 2px 0 0;
+  color: white;
+  font-size: 12px;
+}
+
+/* 单个物品卡片 */
+.item-a {
+  display: block;
+  height: var(--drop-item-h);
+  width: 100%;
+  text-align: center;
+  position: relative;
+  border-radius: 1px;
+  background: url("../../assets/img/item_bg.png") center/100% 100% no-repeat,
+              linear-gradient(180deg, #3a4250 0%, #1a2029 100%);
+  overflow: hidden;
+}
+.item-a img {
+  max-width: 96%;
+  max-height: 96%;
+  width: auto;
+  height: auto;
+  image-rendering: pixelated;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.item-a.gold-cell img {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  object-fit: fill;
+  transform: none;
+}
+
+/* 品质色条（底部 4px） */
+.bar {
+  height: 4px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 0 0 1px 1px;
+  z-index: 3;
+}
+
+/* 7 档品质色 */
+.color1 { background-color: rgb(176,195,217); }
+.color2 { background-color: rgb(94,152,217); }
+.color3 { background-color: rgb(75,105,255); }
+.color4 { background-color: rgb(126,71,255); }
+.color5 { background-color: rgb(211,44,230); }
+.color6 { background-color: rgb(235,75,75); }
+.color7 { background-color: rgb(255,215,0); }
+.color1-font { color: rgb(176,195,217); }
+.color2-font { color: rgb(94,152,217); }
+.color3-font { color: rgb(75,105,255); }
+.color4-font { color: rgb(126,71,255); }
+.color5-font { color: rgb(211,44,230); }
+.color6-font { color: rgb(235,75,75); }
+.color7-font { color: rgb(255,215,0); }
+
+/* StatTrak 橙色（仓库/详情公用） */
+.stattrakcolor { color: #cf6a32; }
+
+/* 概率信息条（详情页底部） */
+.odds-bar {
+  margin: 18px var(--view-pad-x) 0;
+  padding: 10px 14px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-1);
+}
+.odds-bar .odds-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.odds-bar .odds-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}

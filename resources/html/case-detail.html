@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{caseName}}</title>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/case.css">
+<style>
+body { width: 1280px; min-height: 720px; margin: 0; background: #0a0d11; }
+</style>
+</head>
+<body>
+<div class="cs-bg" style="background-image:url('{{bgUrl}}');"></div>
+
+<div class="case-page">
+  <h1 class="case-title-h1">{{categoryLabel}}</h1>
+  <p class="unlock-text">解锁 <b>{{caseName}}</b></p>
+
+  <div class="case-img-div">
+    <img src="{{caseImg}}" alt="{{caseName}}">
+  </div>
+
+  <div class="odds-bar">
+    {{oddsHtml}}
+  </div>
+
+  <div id="case-d">
+    <p>这个箱子里可能有以下物品：（共 {{itemsTotal}} 件）</p>
+    <hr>
+    <ol>{{itemsHtml}}</ol>
+  </div>
+</div>
+</body>
+</html>

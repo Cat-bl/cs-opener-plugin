@@ -1,0 +1,20 @@
+{
+  "name": "csgo-opener",
+  "version": "0.2.0",
+  "description": "TRSS-Yunzai 插件 - CS:GO 模拟开箱（视频+puppeteer 截图）",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "render": "node tools/render_video.mjs"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.61",
+    "chokidar": "^3.6.0",
+    "lodash": "^4.17.21",
+    "yaml": "^2.4.5"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.43.1"
+  }
+}

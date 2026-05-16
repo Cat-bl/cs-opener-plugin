@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>CS:GO 商城 - {{categoryLabel}}</title>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/shop.css">
+<style>
+body { width: 1280px; }
+.view { min-height: 720px; padding: 30px 40px; }
+.view-header { margin-bottom: 24px; }
+.view-title .accent { color: var(--accent-glow); }
+.cat-pill {
+  display: inline-block;
+  margin-left: 14px;
+  padding: 3px 12px;
+  background: var(--accent);
+  color: #16110a;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.shop-meta {
+  color: var(--text-2);
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+</style>
+</head>
+<body>
+<div class="view">
+  <div class="view-header">
+    <div>
+      <div class="view-title">CS<span class="accent">:</span>GO 商城<span class="cat-pill">{{categoryLabel}}</span></div>
+      <div class="view-subtitle">{{caseCount}} 个箱子 · {{ts}}</div>
+    </div>
+    <div class="shop-meta">提示：#csgo 看 [箱名] 查看详情</div>
+  </div>
+
+  <div class="case-grid">
+    {{cardsHtml}}
+  </div>
+</div>
+</body>
+</html>

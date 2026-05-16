@@ -1,0 +1,108 @@
+/* ========== 库存视图（puppeteer 截图，无筛选按钮） ========== */
+
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .inv-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .inv-img { height: 90px !important; }
+  .inv-weapon { font-size: 11px !important; }
+  .inv-name { font-size: 10px !important; }
+}
+
+.inv-card {
+  background: url("../../assets/img/item_bg.png") center/100% 100% no-repeat,
+              linear-gradient(180deg, #20262f, #161b22);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all .15s;
+  position: relative;
+  overflow: hidden;
+}
+.inv-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--rc);
+  box-shadow: 0 6px 20px rgba(0,0,0,.6), 0 0 0 1px var(--rc);
+}
+.inv-img {
+  position: relative;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.inv-img img {
+  height: 96%;
+  width: auto;
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 2;
+}
+.inv-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 4px;
+  z-index: 1;
+}
+.inv-card .st-tag {
+  position: absolute;
+  top: 6px; left: 6px;
+  background: #cf6a32;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  z-index: 3;
+}
+.inv-weapon { font-size: 12px; font-weight: 700; color: #fff; padding: 6px 8px 0; }
+.inv-name {
+  font-size: 11px;
+  color: var(--text-2);
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inv-meta {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px 8px;
+  font-size: 10px;
+  color: var(--text-2);
+}
+.inv-tier {
+  padding: 1px 6px;
+  background: rgba(255,255,255,.08);
+  border-radius: 2px;
+  color: #fff;
+}
+
+.inv-empty {
+  text-align: center;
+  padding: 80px 0;
+  color: var(--text-2);
+}
+.inv-empty-title { font-size: 18px; color: #fff; margin-bottom: 8px; }
+
+/* 当前筛选标签（替代原 .inv-filter.active） */
+.inv-filter-label {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 2px 10px;
+  background: var(--accent);
+  color: #16110a;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}

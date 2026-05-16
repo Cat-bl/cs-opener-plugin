@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{userName}} 的开箱记录</title>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/history.css">
+<link rel="stylesheet" href="../css/case.css">
+<style>
+body { width: 1280px; min-height: 720px; }
+.view { padding: 24px 32px; }
+</style>
+</head>
+<body>
+<div class="view">
+  <div class="user-bar">
+    <div class="user-name">{{userName}} 的开箱记录</div>
+    <div class="user-coins"><span class="coin-icon">¥</span> {{coins}}</div>
+  </div>
+
+  <div class="view-header">
+    <div>
+      <div class="view-title">已开 {{opened}} 箱</div>
+      <div class="view-subtitle">最近 {{recentCount}} 条 · {{ts}}</div>
+    </div>
+  </div>
+
+  <div class="hist-stats">
+    {{statsHtml}}
+  </div>
+
+  <div class="hist-list">
+    <div class="hist-row head">
+      <div>时间</div>
+      <div>物品</div>
+      <div>箱</div>
+      <div>磨损</div>
+      <div>StatTrak</div>
+    </div>
+    {{rowsHtml}}
+  </div>
+</div>
+</body>
+</html>
