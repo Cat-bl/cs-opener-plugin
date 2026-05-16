@@ -1,4 +1,4 @@
-import { plugin } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import { renderTpl } from '../model/render.js'
 import { loadCases, getCasesByCategory, findCategoryByLabel, CATEGORIES } from '../model/data.js'
 import { renderCaseCard, formatDate } from '../model/html_helpers.js'

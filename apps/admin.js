@@ -5,7 +5,7 @@
  *   #csgo 状态              查看当前下载任务状态
  */
 
-import { plugin } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import { downloadAll } from '../model/downloader.js'
 import { reloadCases } from '../model/data.js'
 

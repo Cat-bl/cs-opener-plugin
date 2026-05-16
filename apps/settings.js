@@ -1,4 +1,4 @@
-import { plugin } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import * as Store from '../model/store.js'
 import { RARITY, ODDS_PRESETS, PRESET_ALIAS, rarityNumFromAlias, normalizeOdds, getDefaultOdds } from '../model/rarity.js'
 

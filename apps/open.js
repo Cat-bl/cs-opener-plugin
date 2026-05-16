@@ -1,7 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { plugin, segment } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import { loadCases, findCaseByName } from '../model/data.js'
 import { rollDrop } from '../model/rarity.js'
 import * as Store from '../model/store.js'

@@ -1,4 +1,4 @@
-import { plugin } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import { renderTpl } from '../model/render.js'
 import * as Store from '../model/store.js'
 import { rarityNumFromAlias, RARITY } from '../model/rarity.js'

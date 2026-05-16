@@ -1,4 +1,4 @@
-import { plugin } from '../model/yunzai.js'
+import plugin from '../../../lib/plugins/plugin.js'
 import { renderTpl } from '../model/render.js'
 import { loadCases, findCaseByName } from '../model/data.js'
 import { RARITY, geometricOdds, getDefaultOdds, RARITY_NUMS_ASC } from '../model/rarity.js'
