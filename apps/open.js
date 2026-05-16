@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import plugin from '../../../lib/plugins/plugin.js'
 import { ensureDataReady, findCaseByName, getCases } from '../model/data.js'
 import { rollDrop } from '../model/rarity.js'
+import { getGroupOdds } from '../model/group_odds.js'
 import * as Store from '../model/store.js'
 import { renderOpenVideo } from '../model/video/render.js'
 import { checkCooldown } from '../model/cooldown.js'
@@ -134,11 +135,14 @@ export class CsgoOpen extends plugin {
     // 锁住该用户（在金币校验前，避免重复扣费）
     openingUsers.add(e.user_id)
     try {
+      // 读群概率（在 Store.update 外面，因为 update 回调是同步的）
+      const groupOdds = e.group_id ? await getGroupOdds(e.group_id) : null
+
       // 扣金币 + 抽奖 + 写入库存 + 记 lastCase（全部串行，避免并发争抢同一存档）
       const result = await Store.update(e.user_id, d => {
         if (d.coins < c.price) return { ok: false, msg: `金币不足，需要 ${c.price}（当前 ${d.coins}）` }
         d.coins -= c.price
-        const drop = rollDrop(c, null)   // 始终用全局概率（config.defaultOdds，主人可改）
+        const drop = rollDrop(c, groupOdds)   // 群概率 > 全局（rollDrop 内部 null 时用 config.defaultOdds）
         d.inventory.unshift(drop)
         d.history.unshift(drop)
         d.stats.opened += 1
