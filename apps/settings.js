@@ -86,6 +86,10 @@ export class CsgoSettings extends plugin {
       await e.reply('✅ 已重置你的存档（金币/库存/记录回到初始状态）')
     } else {
       RESET_PENDING.set(e.user_id, now)
+      // 60s 后若用户没确认，自动清掉 entry，避免 Map 长期累积
+      setTimeout(() => {
+        if (RESET_PENDING.get(e.user_id) === now) RESET_PENDING.delete(e.user_id)
+      }, 60_000).unref?.()
       await e.reply('⚠️ 这将清空你的全部金币、库存、开箱记录（不可恢复）\n如确认，请在 60 秒内再发一次 #csgo 重置存档')
     }
     return true

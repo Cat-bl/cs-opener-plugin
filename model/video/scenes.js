@@ -2,10 +2,21 @@
 
 import { EASE_OUT } from './easing.js'
 import { pickGoldImage } from './assets.js'
+import { sellPriceOf } from '../rarity.js'
 
 const RARITY_COLOR = {
   1: 'rgb(176,195,217)', 2: 'rgb(94,152,217)', 3: 'rgb(75,105,255)',
   4: 'rgb(126,71,255)',  5: 'rgb(211,44,230)', 6: 'rgb(235,75,75)', 7: 'rgb(255,215,0)',
+}
+
+const RARITY_NAME = {
+  1: '消费级', 2: '工业级', 3: '军规级', 4: '受限', 5: '保密', 6: '隐秘', 7: '罕见特殊',
+}
+
+/* 把 'rgb(r,g,b)' 拆成 [r,g,b] 数字 */
+function parseRgb(s) {
+  const m = String(s || '').match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+  return m ? [+m[1], +m[2], +m[3]] : [255, 255, 255]
 }
 
 export function drawBackground(ctx, bg, W, H) {
@@ -240,8 +251,40 @@ export function drawIntro(ctx, layout, tMs, state) {
 
 /* ---------- Reveal ---------- */
 
-export function drawReveal(ctx, layout, tMs, drop, assets, caseObj, goldSprite) {
+/* 顶部品质色射灯锥（增强视觉冲击） */
+function drawSpotlight(ctx, W, H, rarityColor) {
+  const [r, g, b] = parseRgb(rarityColor)
+  const grad = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, H * 0.85)
+  grad.addColorStop(0,   `rgba(${r},${g},${b},0.20)`)
+  grad.addColorStop(0.4, `rgba(${r},${g},${b},0.08)`)
+  grad.addColorStop(1,   `rgba(${r},${g},${b},0)`)
+  ctx.save()
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, W, H)
+  ctx.restore()
+}
+
+/* 圆角矩形 path（兼容老 canvas） */
+function roundRectPath(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return }
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.arcTo(x + w, y, x + w, y + h, r)
+  ctx.arcTo(x + w, y + h, x, y + h, r)
+  ctx.arcTo(x, y + h, x, y, r)
+  ctx.arcTo(x, y, x + w, y, r)
+  ctx.closePath()
+}
+
+export function drawReveal(ctx, layout, tMs, state) {
   const { W, H } = layout
+  const { drop, assets, caseObj, goldSprite } = state
+  const rarityColor = drop.rarityColor || RARITY_COLOR[drop.rarityNum] || '#fff'
+  const rarityName  = drop.rarityName  || RARITY_NAME[drop.rarityNum] || ''
+
+  // 顶部品质色射灯（金色由 halo 接管，不重复）
+  if (drop.rarityNum !== 7) drawSpotlight(ctx, W, H, rarityColor)
+
   if (drop.rarityNum === 7) {
     const rot = (tMs / 6000) * Math.PI * 2
     const pulseT = (tMs / 2400) * Math.PI * 2
@@ -263,6 +306,7 @@ export function drawReveal(ctx, layout, tMs, drop, assets, caseObj, goldSprite) 
   ctx.save()
   ctx.globalAlpha = alpha
 
+  // 武器名标题
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
@@ -270,44 +314,101 @@ export function drawReveal(ctx, layout, tMs, drop, assets, caseObj, goldSprite) 
   ctx.shadowColor = 'rgba(0,0,0,.8)'
   ctx.shadowOffsetY = 2; ctx.shadowBlur = 8
   const nameLine =
-    `${drop.weapon}${drop.paint ? ' | ' + drop.paint : ''}${drop.isStatTrak ? ' (StatTrak™)' : ''}`
+    `${drop.weapon}${drop.paint ? ' | ' + drop.paint : ''}`
   ctx.fillText(nameLine, W / 2, H * 0.12)
   ctx.shadowBlur = 0; ctx.shadowOffsetY = 0
-  ctx.fillStyle = drop.rarityColor || RARITY_COLOR[drop.rarityNum] || '#fff'
-  ctx.fillRect(W / 2 - 40, H * 0.12 + 42, 80, 3)
+  ctx.fillStyle = rarityColor
+  ctx.fillRect(W / 2 - 50, H * 0.12 + 42, 100, 3)
 
+  // 品质标签 chip（含 StatTrak™ 标识）
+  ctx.font = '600 13px "YaHei",sans-serif'
+  const chipText = rarityName + (drop.isStatTrak ? '  ·  StatTrak™' : '')
+  const chipW = ctx.measureText(chipText).width + 26
+  const chipH = 24
+  const chipX = W / 2 - chipW / 2
+  const chipY = H * 0.12 + 56
+  ctx.save()
+  ctx.fillStyle = 'rgba(0,0,0,0.55)'
+  roundRectPath(ctx, chipX, chipY, chipW, chipH, 12)
+  ctx.fill()
+  // chip 边框
+  ctx.strokeStyle = rarityColor
+  ctx.lineWidth = 1.5
+  ctx.stroke()
+  ctx.restore()
+  ctx.fillStyle = rarityColor
+  ctx.textBaseline = 'middle'
+  ctx.fillText(chipText, W / 2, chipY + chipH / 2 + 1)
+
+  // 物品大图（品质色发光 + 黑色阴影叠加）
   if (assets.dropImg) {
-    const maxW = W * 0.7, maxH = H * 0.6
+    const maxW = W * 0.7, maxH = H * 0.55
     const ar = assets.dropImg.width / assets.dropImg.height
     let iw = maxW, ih = iw / ar
     if (ih > maxH) { ih = maxH; iw = ih * ar }
     iw *= scale; ih *= scale
+    const ix = W / 2 - iw / 2
+    const iy = H / 2 - ih / 2 + 12
     ctx.save()
+    // 第一遍：品质色大模糊（外发光）
+    ctx.shadowColor = rarityColor
+    ctx.shadowBlur = 55
+    ctx.drawImage(assets.dropImg, ix, iy, iw, ih)
+    // 第二遍：品质色中模糊（加强）
+    ctx.shadowBlur = 28
+    ctx.drawImage(assets.dropImg, ix, iy, iw, ih)
+    // 第三遍：黑色阴影（落地感）
     ctx.shadowColor = 'rgba(0,0,0,.8)'
-    ctx.shadowOffsetY = 14; ctx.shadowBlur = 30
-    ctx.drawImage(assets.dropImg, W / 2 - iw / 2, H / 2 - ih / 2, iw, ih)
+    ctx.shadowOffsetY = 14; ctx.shadowBlur = 24
+    ctx.drawImage(assets.dropImg, ix, iy, iw, ih)
     ctx.restore()
   }
 
+  // 左下信息列（含售价）
   ctx.textAlign = 'left'
   ctx.textBaseline = 'bottom'
   ctx.font = '14px "YaHei",sans-serif'
   const lines = []
-  if (drop.wear != null) lines.push(`磨损: ${drop.wear.toFixed(13)}`)
-  if (drop.pattern != null) lines.push(`图案模板: ${drop.pattern}`)
-  lines.push(`箱: ${caseObj.name}`)
+  if (drop.wear != null)    lines.push(['磨损', drop.wear.toFixed(13)])
+  if (drop.wearTierName)    lines.push(['品相', `${drop.wearTierName} (${drop.wearTier})`])
+  if (drop.pattern != null) lines.push(['图案模板', drop.pattern])
+  lines.push(['箱', caseObj.name])
   ctx.shadowColor = 'rgba(0,0,0,.8)'
   ctx.shadowBlur = 6
+  // 估算售价（rarity.js 内部用 config.sellPriceMultiplier）
+  let price = 0
+  try { price = sellPriceOf(drop) } catch {}
+  if (price > 0) lines.push(['出售可得', `¥ ${price} 金币`])
+
   let ly = H - 24
   for (let i = lines.length - 1; i >= 0; i--) {
-    ctx.fillStyle = '#fff'
-    ctx.fillText(lines[i], 24, ly)
+    const [k, v] = lines[i]
+    ctx.fillStyle = 'rgba(180,185,191,.9)'
+    ctx.fillText(k + ':', 24, ly)
+    ctx.fillStyle = (k === '出售可得') ? 'rgb(242,176,60)' : '#fff'
+    const kw = ctx.measureText(k + ': ').width
+    ctx.fillText(String(v), 24 + kw, ly)
     ly -= 22
   }
 
+  // 右下提示
   ctx.textAlign = 'right'
-  ctx.fillStyle = 'rgba(255,255,255,.6)'
+  ctx.fillStyle = 'rgba(255,255,255,.55)'
   ctx.font = '13px "YaHei",sans-serif'
   ctx.fillText('开箱完成', W - 24, H - 24)
+  ctx.restore()
+}
+
+/* ---------- 右上角全局用户名水印 ---------- */
+export function drawWatermark(ctx, W, H, userName) {
+  if (!userName) return
+  ctx.save()
+  ctx.font = '500 14px "YaHei",sans-serif'
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'top'
+  ctx.shadowColor = 'rgba(0,0,0,0.85)'
+  ctx.shadowBlur = 6
+  ctx.fillStyle = 'rgba(255,255,255,0.75)'
+  ctx.fillText(userName, W - 16, 12)
   ctx.restore()
 }

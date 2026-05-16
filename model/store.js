@@ -44,7 +44,12 @@ const queues = new Map()
 function runQueued(uid, fn) {
   const prev = queues.get(uid) || Promise.resolve()
   const next = prev.then(fn, fn)
-  queues.set(uid, next.catch(() => {}))
+  const guarded = next.catch(() => {})
+  queues.set(uid, guarded)
+  // 完成时若仍是最新引用 → 删 entry，避免 Map 长期累积
+  guarded.then(() => {
+    if (queues.get(uid) === guarded) queues.delete(uid)
+  })
   return next
 }
 

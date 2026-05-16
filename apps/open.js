@@ -171,7 +171,8 @@ export class CsgoOpen extends plugin {
 
       const release = await acquireSlot()
       try {
-        await renderOpenVideo(result.drop, c, outPath)
+        const userName = e.sender?.nickname || e.sender?.card || e.member?.card || String(e.user_id)
+        await renderOpenVideo(result.drop, c, outPath, { userName })
       } catch (err) {
         release()
         await cleanup()   // 立即删可能写了一半的文件

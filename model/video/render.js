@@ -12,7 +12,14 @@ import { rollRarityNumForCase } from '../rarity.js'
 import Config from '../config.js'
 import { EASE_SPIN } from './easing.js'
 import { ensureFonts, loadAssets, buildGoldHaloSprite } from './assets.js'
-import { drawBackground, drawStrip, drawLetterboxAndPointer, drawIntro, drawReveal } from './scenes.js'
+
+/* 金色光晕是纯函数确定输出（无参数），永久缓存避免每次开箱重新生成 1024×1024 ImageData（~4MB + ~200ms） */
+let _goldSprite = null
+function getGoldSprite() {
+  if (!_goldSprite) _goldSprite = buildGoldHaloSprite()
+  return _goldSprite
+}
+import { drawBackground, drawStrip, drawLetterboxAndPointer, drawIntro, drawReveal, drawWatermark } from './scenes.js'
 import { encodeMP4 } from './encode.js'
 
 const TOTAL_ITEMS  = 30
@@ -120,9 +127,10 @@ export async function renderOpenVideo(drop, caseObj, outPath, opts = {}) {
   const TOTAL_FRAMES = Math.round(layout.TOTAL_MS / 1000 * fps)
 
   const assets = await loadAssets(caseObj, drop, stripItems, introItems)
-  const goldSprite = buildGoldHaloSprite()
+  const goldSprite = getGoldSprite()
   const jitter = (Math.random() - 0.5) * (layout.SPIN_ITEM_W * 0.65)
-  const state = { caseObj, drop, stripItems, introItems, assets, goldSprite, jitter }
+  const userName = opts.userName || ''
+  const state = { caseObj, drop, stripItems, introItems, assets, goldSprite, jitter, userName }
 
   const canvas = createCanvas(W, H)
   const ctx = canvas.getContext('2d')
@@ -147,8 +155,10 @@ export async function renderOpenVideo(drop, caseObj, outPath, opts = {}) {
       ctx.fillStyle = '#000'
       ctx.fillRect(0, 0, W, layout.LETTERBOX_H)
       ctx.fillRect(0, H - layout.LETTERBOX_H, W, layout.LETTERBOX_H)
-      drawReveal(ctx, layout, tMs - layout.REVEAL_START_MS, drop, assets, caseObj, goldSprite)
+      drawReveal(ctx, layout, tMs - layout.REVEAL_START_MS, state)
     }
+    // 右上角全局水印（盖在所有元素之上）
+    drawWatermark(ctx, W, H, userName)
   }
 
   async function* frameSource() {

@@ -4,16 +4,17 @@
 
 [![ByMykel](https://img.shields.io/badge/data-ByMykel%2FCSGO--API-blue)](https://github.com/ByMykel/CSGO-API)
 
-复刻 CS:GO 客户端开箱流程，包括 **6 秒滚动条 + 黄色指针 + 上下黑边 letterbox + 真实音效 + 金色全屏旋转光晕**。开箱以 MP4 视频形式发到群里，其余页面用 puppeteer 截图。
+复刻 CS:GO 客户端开箱流程，包括 **6 秒滚动条 + 黄色指针 + 上下黑边 letterbox + 真实音效 + 金色全屏旋转光晕 + 品质色发光 reveal + 右上角玩家昵称水印**。
+开箱以 MP4 视频形式发到群里（约 14s），其余页面用 puppeteer 截图。
+预览页物品太多时会**自动滚动展示**完整列表（2s 内匀速滚完），滚完才开箱。
 
 ---
 
 ## 命令一览
 
-> 所有命令以 `#csgo` 开头。
-
-> 所有命令的 **`#` 可省略**、**`csgo` 与命令之间的空格也可省略**。
+> 所有命令的 **`#` 可省略**、`csgo` 与命令之间的**空格也可省略**。
 > 例：`#csgo 开箱`、`csgo 开箱`、`#csgo开箱`、`csgo开箱` 都触发。
+> 其中 `开箱` 和 `选箱` 还可**完全省略 csgo 前缀**：直接发 `开箱` 也会触发。
 
 ### 玩家命令
 
@@ -101,7 +102,7 @@ download:
 **或者：在服务器上手动跑** CLI（也走 config.yaml 的代理设置）：
 
 ```bash
-cd TRSS-Yunzai/plugins/csgo-opener
+cd TRSS-Yunzai/plugins/csgo-opener-plugin
 node tools/download_skins.mjs
 # 或：HTTPS_PROXY=http://127.0.0.1:7890 node tools/download_skins.mjs
 ```
@@ -129,6 +130,7 @@ QQ 私聊或群里发：
 ```yaml
 initialCoins: 10000        # 新用户初始金币
 sellPriceMultiplier: 1.0   # 售价倍率
+dailyReward: 500           # 每日签到奖励金币
 defaultOdds:               # 标准武器箱默认掉率（万分比，总和 100000）
   3: 79920                 # 军规级（蓝）
   4: 15980                 # 受限（紫）
@@ -139,15 +141,24 @@ historyLimit: 500          # 单用户保留最近 N 条记录
 
 video:
   fps: 60                  # 60 或 30；30 文件更小、速度更快
-  introMs: 2000            # 预览页停留毫秒
+  introMs: 2000            # 预览页停留毫秒（物品多时自动延长到 4s 加滚动）
   revealMs: 5500           # 开箱结果停留毫秒
   width: 1280
   height: 720
+  maxConcurrent: 2         # 同时生成的视频数（CPU 上限，建议 2-4）
+  maxPending: 5            # 最大排队人数（超过直接拒绝并退款）
 
 puppeteer:
   width: 1280
   height: 720
   scale: 1
+
+cooldown:                  # 命令冷却（秒），置 0 = 不限
+  open: 3                  # 开箱
+  shop: 1                  # 商城
+  case: 2                  # 单箱详情
+  checkin: 1               # 签到
+  inv: 1                   # 仓库
 
 download:
   proxy: ""                # HTTP/HTTPS 代理，留空 = 直连
@@ -156,14 +167,15 @@ download:
 ```
 
 只需写覆盖项；未写的会自动用默认值。
+**插件升级后 default 新增的字段会自动按位置插入到你的 `config/config.yaml`**（保留你已有的注释和改动），无需手动同步。
 
 ---
 
 ## 数据存储
 
-- `data/users/{QQ号}.json` — 每人一份存档（金币 / 库存 / 历史 / 统计 / 自定义概率）
-- 想给某人重置：删对应文件，或让 ta 发 `#csgo 重置存档`
-- 默认按 user_id 隔离，群内互不影响
+- `data/users/{QQ号}.json` — 每人一份存档（金币 / 库存 / 历史 / 统计 / 默认箱 / 上次签到）
+- 想给某人重置：删对应文件，或让 ta 发 `#csgo 重置存档`（连发 2 次确认）
+- 概率是**全局统一**的（只有主人能改，写入 `config.yaml`），不在用户存档里
 
 ---
 
@@ -188,21 +200,22 @@ download:
 ## 项目结构
 
 ```
-csgo-opener/
+csgo-opener-plugin/
 ├── index.js                  # 插件入口（自动加载 apps/）
 ├── apps/                     # 命令处理
 │   ├── help.js / shop.js / case.js / open.js
-│   ├── inventory.js / history.js / settings.js
-│   └── admin.js              # 主人命令
+│   ├── inventory.js / history.js / settings.js / checkin.js
+│   ├── admin.js              # 主人命令（更新数据 / 状态）
+│   └── update.js             # #csgo 更新（git pull）
 ├── model/                    # 核心逻辑
-│   ├── config.js             # YAML + chokidar 热更
+│   ├── config.js             # YAML + chokidar 热更 + 启动自动补齐新字段
 │   ├── data.js               # crates.json 加载/检索
-│   ├── rarity.js             # 抽奖/品质/磨损
-│   ├── store.js              # 用户存档（per-uid 串行）
+│   ├── rarity.js             # 抽奖/品质/磨损/售价
+│   ├── store.js              # 用户存档（per-uid promise queue 串行）
+│   ├── cooldown.js           # 命令冷却（带自动清扫 stale entry）
 │   ├── render.js             # puppeteer 渲染封装
-│   ├── downloader.js         # 增量下载
+│   ├── downloader.js         # 增量下载（undici ProxyAgent 走代理）
 │   ├── html_helpers.js
-│   ├── yunzai.js             # plugin / segment 引入（fallback 友好）
 │   └── video/                # 视频生成（canvas + ffmpeg）
 │       ├── render.js / scenes.js / assets.js
 │       └── easing.js / encode.js
