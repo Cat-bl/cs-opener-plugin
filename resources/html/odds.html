@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>概率设置</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 720px;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: #e6e6e6;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(217,153,50,.15), transparent 70%),
+    linear-gradient(135deg, #0e1419 0%, #1a2330 50%, #0e1419 100%);
+}
+.wrap { padding: 28px 24px; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(242,176,60,.3);
+}
+.header-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+}
+.header-badge {
+  padding: 4px 14px;
+  background: rgba(242,176,60,.15);
+  border: 1px solid rgba(242,176,60,.5);
+  border-radius: 12px;
+  font-size: 13px;
+  color: #ffd97a;
+  letter-spacing: 1px;
+}
+
+/* 状态消息 */
+.status-msg {
+  padding: 14px 18px;
+  background: linear-gradient(120deg, rgba(242,176,60,.12), rgba(217,153,50,.04) 60%);
+  border: 1px solid rgba(242,176,60,.4);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.status-msg .icon { margin-right: 8px; }
+
+/* 概率条 */
+.odds-table { width: 100%; }
+.odds-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dotted rgba(255,255,255,.08);
+}
+.odds-row:last-child { border-bottom: none; }
+.odds-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.odds-name {
+  width: 80px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.odds-bar-wrap {
+  flex: 1;
+  height: 20px;
+  background: rgba(255,255,255,.06);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.odds-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .3s;
+}
+.odds-val {
+  width: 130px;
+  text-align: right;
+  font-size: 14px;
+  color: #b4b9bf;
+  font-family: Consolas, monospace;
+}
+.odds-pct {
+  width: 70px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* 提示 */
+.hint {
+  margin-top: 18px;
+  font-size: 12px;
+  color: rgba(255,255,255,.4);
+  letter-spacing: 1px;
+  line-height: 1.8;
+}
+
+/* footer */
+.cs-global-footer {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,.55);
+  letter-spacing: 2px;
+  padding: 18px 0 14px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+}
+</style>
+<style>
+body { position: relative; }
+body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  border: 3px solid rgba(242,176,60,.6);
+  box-shadow: inset 0 0 32px rgba(242,176,60,.15);
+  z-index: 9999;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-title">开箱概率</div>
+    <div class="header-badge">{{@ sourceBadge}}</div>
+  </div>
+
+  {{@ statusHtml}}
+
+  <div class="odds-table">
+    {{@ rowsHtml}}
+  </div>
+
+  <div class="hint">{{@ hintHtml}}</div>
+</div>
+<div class="cs-global-footer">Trss-Yunzai · cs-opener-plugin · 冰凉到通透</div>
+</body>
+</html>

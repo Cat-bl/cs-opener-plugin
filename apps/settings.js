@@ -1,16 +1,40 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import * as Store from '../model/store.js'
+import { renderTpl } from '../model/render.js'
 import { RARITY, ODDS_PRESETS, PRESET_ALIAS, rarityNumFromAlias, normalizeOdds, getDefaultOdds } from '../model/rarity.js'
 import { getGroupOdds, setGroupOdds, resetGroupOdds } from '../model/group_odds.js'
 
 const TIERS = [3, 4, 5, 6, 7]
 
-function formatOdds(odds) {
-  return TIERS.map(n => {
+/* 构建概率图片数据 */
+function buildOddsImage(odds, source, statusMsg) {
+  const total = TIERS.reduce((s, n) => s + (odds[n] || 0), 0) || 1
+  const maxVal = Math.max(...TIERS.map(n => odds[n] || 0))
+  const rowsHtml = TIERS.map(n => {
     const v = odds[n] || 0
-    const pct = (v / 100000 * 100).toFixed(v >= 100 ? 2 : 4)
-    return `  ${RARITY[n].name.padEnd(8, '　')} ${String(v).padStart(6)}/100000 (${pct}%)`
-  }).join('\n')
+    const pct = (v / total * 100).toFixed(2)
+    const barW = maxVal > 0 ? Math.max(2, v / maxVal * 100) : 0
+    const color = RARITY[n].color
+    return `
+      <div class="odds-row">
+        <div class="odds-dot" style="background:${color}"></div>
+        <div class="odds-name" style="color:${color}">${RARITY[n].name}</div>
+        <div class="odds-bar-wrap"><div class="odds-bar" style="width:${barW}%;background:${color}"></div></div>
+        <div class="odds-val">${v} / ${total}</div>
+        <div class="odds-pct" style="color:${color}">${pct}%</div>
+      </div>`
+  }).join('')
+
+  const statusHtml = statusMsg
+    ? `<div class="status-msg"><span class="icon">✅</span>${statusMsg}</div>`
+    : ''
+
+  const hintHtml = `主人命令（群内生效）：<br>` +
+    `#cs 概率预设 [默认/欧皇/极品/均匀/残酷]<br>` +
+    `#cs 设置概率 [档] [万分比]<br>` +
+    `#cs 重置概率（回退到全局默认）`
+
+  return { rowsHtml, statusHtml, sourceBadge: source, hintHtml }
 }
 
 /* 获取当前生效概率：群概率 > 全局 */
@@ -39,20 +63,14 @@ export class CsgoSettings extends plugin {
     })
   }
 
-  /* 任何人可查看：显示当前群/全局概率 */
   async show(e) {
     const { odds, source } = await effectiveOdds(e)
-    await e.reply(
-      `【当前开箱概率】（${source}）\n${formatOdds(odds)}\n\n` +
-      `主人命令（群内生效）：\n` +
-      `  #cs 概率预设 [默认/欧皇/极品/均匀/残酷]\n` +
-      `  #cs 设置概率 [档] [万分比]\n` +
-      `  #cs 重置概率（回退到全局默认）`
-    )
+    const data = buildOddsImage(odds, source, '')
+    const img = await renderTpl('odds', data, { width: 720 })
+    await e.reply(img)
     return true
   }
 
-  /* 仅主人：切预设（群内 = 设该群；私聊 = 设全局） */
   async preset(e) {
     if (!e.isMaster) { await e.reply('概率设置仅主人可用'); return true }
     const m = e.msg.match(/^#?\s*cs\s*概率预设\s*(.+)$/)
@@ -65,18 +83,21 @@ export class CsgoSettings extends plugin {
     const odds = { ...ODDS_PRESETS[key] }
     if (e.group_id) {
       await setGroupOdds(e.group_id, odds)
-      await e.reply(`✅ 本群概率已切换到「${name}」:\n${formatOdds(odds)}`)
+      const data = buildOddsImage(odds, '本群', `已切换到预设「${name}」`)
+      const img = await renderTpl('odds', data, { width: 720 })
+      await e.reply(img)
     } else {
       const Config = (await import('../model/config.js')).default
       const cfg = Config.get()
       cfg.defaultOdds = odds
       Config.save()
-      await e.reply(`✅ 全局概率已切换到「${name}」（已写入 config.yaml）:\n${formatOdds(odds)}`)
+      const data = buildOddsImage(odds, '全局', `已切换到预设「${name}」（写入 config.yaml）`)
+      const img = await renderTpl('odds', data, { width: 720 })
+      await e.reply(img)
     }
     return true
   }
 
-  /* 仅主人：调单档 */
   async setOne(e) {
     if (!e.isMaster) { await e.reply('概率设置仅主人可用'); return true }
     const m = e.msg.match(/^#?\s*cs\s*设置概率\s*(\S+)\s+(\d+)$/)
@@ -93,27 +114,32 @@ export class CsgoSettings extends plugin {
       const cur = (await getGroupOdds(e.group_id)) || getDefaultOdds()
       const odds = normalizeOdds({ ...cur, [num]: val })
       await setGroupOdds(e.group_id, odds)
-      await e.reply(`✅ 本群 ${RARITY[num].name} = ${val} 并归一化:\n${formatOdds(odds)}`)
+      const data = buildOddsImage(odds, '本群', `${RARITY[num].name} = ${val} 并归一化`)
+      const img = await renderTpl('odds', data, { width: 720 })
+      await e.reply(img)
     } else {
       const Config = (await import('../model/config.js')).default
       const cfg = Config.get()
       cfg.defaultOdds = normalizeOdds({ ...(cfg.defaultOdds || getDefaultOdds()), [num]: val })
       Config.save()
-      await e.reply(`✅ 全局 ${RARITY[num].name} = ${val} 并归一化（已写入 config.yaml）:\n${formatOdds(cfg.defaultOdds)}`)
+      const data = buildOddsImage(cfg.defaultOdds, '全局', `${RARITY[num].name} = ${val} 并归一化（写入 config.yaml）`)
+      const img = await renderTpl('odds', data, { width: 720 })
+      await e.reply(img)
     }
     return true
   }
 
-  /* 仅主人：重置本群概率（回退到全局） */
   async resetOdds(e) {
     if (!e.isMaster) { await e.reply('概率设置仅主人可用'); return true }
     if (!e.group_id) { await e.reply('私聊无群概率可重置，全局概率请直接改 config.yaml'); return true }
     await resetGroupOdds(e.group_id)
-    await e.reply(`✅ 本群概率已重置，回退到全局默认:\n${formatOdds(getDefaultOdds())}`)
+    const odds = getDefaultOdds()
+    const data = buildOddsImage(odds, '全局默认', '本群概率已重置，回退到全局')
+    const img = await renderTpl('odds', data, { width: 720 })
+    await e.reply(img)
     return true
   }
 
-  /* 用户重置自己存档：60s 内连发两次才执行（防误触） */
   async reset(e) {
     const last = RESET_PENDING.get(e.user_id) || 0
     const now = Date.now()

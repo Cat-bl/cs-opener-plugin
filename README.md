@@ -148,7 +148,7 @@ historyLimit: 500          # 单用户保留最近 N 条记录
 video:
   fps: 60                  # 60 或 30；30 文件更小、速度更快
   introMs: 2000            # 预览页停留毫秒（物品多时自动延长到 4s 加滚动）
-  revealMs: 5500           # 开箱结果停留毫秒
+  revealMs: 7500           # 开箱结果停留毫秒
   width: 1280
   height: 720
   maxConcurrent: 2         # 同时生成的视频数（CPU 上限，建议 2-4）

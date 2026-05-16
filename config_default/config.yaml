@@ -25,7 +25,7 @@ historyLimit: 500
 video:
   fps: 60
   introMs: 2000        # 预览页停留时长
-  revealMs: 5500       # 揭示页停留时长
+  revealMs: 7500       # 揭示页停留时长
   width: 1280
   height: 720
   maxConcurrent: 2     # 同时生成的视频数（CPU/内存上限，建议 2-4）
