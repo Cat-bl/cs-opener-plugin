@@ -2,6 +2,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import { renderTpl } from '../model/render.js'
 import { ensureDataReady, getCasesByCategory, findCategoryByLabel, CATEGORIES } from '../model/data.js'
 import { renderCaseCard, formatDate } from '../model/html_helpers.js'
+import { checkCooldown } from '../model/cooldown.js'
 
 export class CsgoShop extends plugin {
   constructor() {
@@ -17,6 +18,8 @@ export class CsgoShop extends plugin {
   }
 
   async shop(e) {
+    const cd = checkCooldown('shop', e.user_id)
+    if (cd) { await e.reply(`商城冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
     const m = e.msg.match(/^#?\s*csgo\s*商城(?:\s+(.+))?$/)
     const arg = (m && m[1] || '').trim()

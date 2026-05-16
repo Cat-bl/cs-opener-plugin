@@ -3,10 +3,669 @@
 <head>
 <meta charset="UTF-8">
 <title>{{userName}} 的开箱记录</title>
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="../css/layout.css">
-<link rel="stylesheet" href="../css/history.css">
-<link rel="stylesheet" href="../css/case.css">
+<style>
+/* ========== CSGO 风格基础样式 ========== */
+:root {
+  /* 背景层 */
+  --bg-0: #0a0d11;
+  --bg-1: #121821;
+  --bg-2: #1a2028;
+  --bg-3: #2a323d;
+  --bg-card: #1b222b;
+  --border: #2e3742;
+  --border-strong: #3b4654;
+
+  /* 文本 */
+  --text-0: #e6e6e6;
+  --text-1: #b4b9bf;
+  --text-2: #7a8089;
+  --text-dim: #555c66;
+
+  /* 强调 */
+  --accent: #d99932;
+  --accent-glow: #f2b03c;
+  --gold: #e4ae39;
+
+  /* 品质色 */
+  --r-milspec:    #4b69ff;
+  --r-restricted: #8847ff;
+  --r-classified: #d32ce6;
+  --r-covert:     #eb4b4b;
+  --r-rare:       #e4ae39;
+
+  /* 圆角 */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 6px;
+
+  /* ----- 响应式尺寸（clamp 模式，自动跟随视口缩放） -----
+   * clamp(min, preferred(vw), max) — 浏览器缩放（含 ctrl+滚轮）时
+   * viewport CSS px 同步变化，clamp 会重算，物品永远合理大小。
+   */
+  /* 开箱滚动条单元：高度先受 vw + vh 双约束，宽度按 567:415 比例反推
+   * spin-zone 是中间 56% 视口区域，所以高度限制为 45vh 留出余量
+   */
+  --spin-item-h:       min(clamp(150px, 23vw, 415px), 45vh);
+  --spin-item-w:       calc(var(--spin-item-h) / 0.733);
+  --spin-item-margin:  clamp(14px, 3vw, 40px);
+
+  /* 商城/物品网格中的物品卡（宽:高 = 1 : 0.74，横向矩形，与原版 CSGO 物品卡比例一致） */
+  --drop-item-w:       clamp(170px, 15vw, 210px);
+  --drop-item-h:       calc(var(--drop-item-w) * 0.74);
+
+  /* 案例图大小 */
+  --case-img-h:        clamp(120px, 18vw, 200px);
+
+  /* 主标题字号 */
+  --title-fs:          clamp(22px, 2.4vw, 34px);
+  --subtitle-fs:       clamp(14px, 1.6vw, 22px);
+
+  /* letterbox 黑条高度 */
+  --letterbox-h:       22%;
+
+  /* 视图内边距 */
+  --view-pad-x:        clamp(12px, 1.8vw, 32px);
+  --view-pad-y:        clamp(12px, 1.4vw, 24px);
+}
+
+/* 平板及以下做更紧凑的视觉调整（非纯 px 覆盖，仍走 clamp） */
+@media (max-width: 1024px) {
+  :root {
+    --spin-item-h:      min(clamp(140px, 26vw, 308px), 42vh);
+    --spin-item-margin: clamp(12px, 2vw, 30px);
+    --drop-item-w:      clamp(150px, 19vw, 190px);
+    --case-img-h:       clamp(120px, 20vw, 170px);
+    --title-fs:         clamp(20px, 3vw, 28px);
+    --subtitle-fs:      clamp(13px, 2vw, 18px);
+  }
+}
+
+/* 手机：进一步压缩 */
+@media (max-width: 640px) {
+  :root {
+    --spin-item-h:      min(clamp(120px, 38vw, 200px), 38vh);
+    --spin-item-margin: clamp(10px, 4vw, 22px);
+    --drop-item-w:      clamp(130px, 30vw, 170px);
+    --case-img-h:       clamp(100px, 28vw, 140px);
+    --title-fs:         clamp(18px, 5vw, 24px);
+    --subtitle-fs:      clamp(12px, 3.4vw, 16px);
+    --letterbox-h:      18%;
+    --view-pad-x:       10px;
+    --view-pad-y:       10px;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Tahoma, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  user-select: none;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+/* 品质类 */
+.rar-milspec    { --rc: var(--r-milspec); }
+.rar-restricted { --rc: var(--r-restricted); }
+.rar-classified { --rc: var(--r-classified); }
+.rar-covert     { --rc: var(--r-covert); }
+.rar-rare       { --rc: var(--r-rare); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.18); }
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 22px;
+  background: linear-gradient(180deg, #2c3540, #1d242d);
+  border: 1px solid var(--border-strong);
+  color: var(--text-0);
+  font-size: 13px;
+  letter-spacing: .5px;
+  border-radius: var(--r-sm);
+  transition: all .15s ease;
+}
+.btn:hover {
+  background: linear-gradient(180deg, #3a4553, #242c37);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn.primary {
+  background: linear-gradient(180deg, #e0a23a, #c08020);
+  border-color: #f2b03c;
+  color: #16110a;
+  font-weight: 700;
+}
+.btn.primary:hover {
+  background: linear-gradient(180deg, #f2b03c, #d09028);
+  color: #000;
+}
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.muted { color: var(--text-2); }
+.dim   { color: var(--text-dim); }
+.stat-trak { color: #cf6a32; font-weight: 700; }
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fadein { animation: fadein .25s ease; }
+
+/* ----- 启动屏 ----- */
+.boot-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: var(--text-1);
+  letter-spacing: 1px;
+}
+.boot-logo {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-shadow: 0 0 30px rgba(217,153,50,.6);
+}
+.boot-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,.08);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.boot-text { font-size: 12px; color: var(--text-2); }
+
+/* ========== 仓库背景 (Warehouse) ========== */
+/* 公用：仿 CS:GO 开箱场景的车间/仓库背景 */
+.warehouse-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    /* 顶部黑暗 */
+    linear-gradient(180deg, #0a0d11 0%, transparent 18%),
+    /* 底部光晕（混凝土反光） */
+    radial-gradient(ellipse 80% 60% at 50% 75%, rgba(190,200,210,.06), transparent 70%),
+    /* 中心射灯 */
+    radial-gradient(ellipse 50% 35% at 50% 30%, rgba(255,230,170,.10), transparent 70%),
+    /* 主体灰墙渐变 */
+    linear-gradient(180deg, #2a2c2e 0%, #1b1d20 45%, #14161a 100%);
+  overflow: hidden;
+}
+/* 黄色铁栏杆（顶部 + 中段） */
+.warehouse-bg::before {
+  content: '';
+  position: absolute;
+  top: 22%;
+  left: 0; right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d99932 0 24px,
+    #1a1d20 24px 48px
+  );
+  opacity: .35;
+  filter: blur(1px);
+  box-shadow: 0 60px 0 -2px rgba(217,153,50,.18);
+}
+/* 透视纹理（淡） */
+.warehouse-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 4px, rgba(255,255,255,.012) 4px 5px),
+    radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.4) 90%);
+  pointer-events: none;
+}
+
+/* 右上角促销徽章（仿"冰凉到通透"） */
+.promo-badge {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  z-index: 5;
+  background: rgba(10,12,15,.85);
+  border: 1px solid var(--border-strong);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  border-radius: var(--r-sm);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.6);
+}
+
+</style>
+<style>
+/* puppeteer 截图版：去 topbar/nav/wallet/bottombar；body 不再是 flex 容器 */
+
+body {
+  margin: 0;
+  background: var(--bg-0);
+}
+
+/* 视图通用容器 */
+.view {
+  background:
+    radial-gradient(ellipse at top, rgba(217,153,50,.04), transparent 60%),
+    var(--bg-0);
+  padding: var(--view-pad-y) var(--view-pad-x);
+  min-height: 100vh;
+}
+
+/* 视图标题 */
+.view-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.view-subtitle {
+  font-size: 12px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+.view-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 顶部用户信息条（仓库/记录页用） */
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(217,153,50,.08), rgba(0,0,0,.3));
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 16px;
+}
+.user-bar .user-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.user-bar .user-coins {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-glow);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-bar .user-coins .coin-icon {
+  display: inline-flex;
+  width: 22px; height: 22px;
+  background: linear-gradient(180deg, #f2b03c, #c08020);
+  border-radius: 50%;
+  color: #16110a;
+  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+</style>
+<style>
+/* ========== 中奖记录视图 ========== */
+
+.hist-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.hist-stat {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+}
+.hist-stat-label {
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.hist-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+.hist-stat-sub {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+.hist-rarity-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+  background: var(--bg-3);
+}
+.hist-rarity-bar > div {
+  height: 100%;
+}
+
+.hist-list {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.hist-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 130px 110px 90px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+/* 平板：压缩列 */
+@media (max-width: 1024px) {
+  .hist-row {
+    grid-template-columns: 90px 1fr 90px 80px 60px;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+/* 手机：换 2 行布局，避免横向溢出 */
+@media (max-width: 640px) {
+  .hist-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name time"
+      "case wear"
+      "case st";
+    gap: 4px 12px;
+    padding: 10px;
+  }
+  .hist-row.head { display: none; }
+  .hist-row .hist-time { grid-area: time; text-align: right; font-size: 10px; }
+  .hist-row .hist-name { grid-area: name; }
+  .hist-row .hist-case { grid-area: case; font-size: 11px; }
+  .hist-row .hist-wear { grid-area: wear; text-align: right; }
+  .hist-row > div:nth-child(5) { grid-area: st; text-align: right; }
+}
+.hist-row:last-child { border-bottom: none; }
+.hist-row.head {
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.hist-time { color: var(--text-2); }
+.hist-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+.hist-dot { width: 8px; height: 8px; border-radius: 2px; }
+.hist-case { color: var(--text-1); }
+.hist-wear { color: var(--text-1); }
+
+.hist-empty {
+  text-align: center;
+  padding: 60px;
+  color: var(--text-2);
+}
+
+</style>
+<style>
+/* ========== 单箱详情页（puppeteer 截图，无动画） ==========
+ * 仅保留 case-detail.html 所需样式，开箱动画/滚动/reveal 走视频
+ */
+
+/* CS 地图背景 */
+.cs-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(2px);
+  transform: scale(1.05);
+}
+.cs-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35) 50%, rgba(0,0,0,.7));
+}
+
+.case-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* 标题 */
+.case-title-h1 {
+  text-align: center;
+  color: rgb(218,219,224);
+  font-size: var(--title-fs);
+  font-weight: 300;
+  letter-spacing: 6px;
+  margin: 30px 0 0 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,.7);
+}
+.unlock-text {
+  text-align: center;
+  color: rgb(205,205,205);
+  font-size: var(--subtitle-fs);
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 6px 0 0;
+  padding: 0 16px;
+}
+.unlock-text b { font-weight: 700; }
+
+/* 箱子大图 */
+.case-img-div {
+  height: calc(var(--case-img-h) + 20px);
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+.case-img-div img {
+  max-height: var(--case-img-h);
+  max-width: 90%;
+  width: auto;
+  filter:
+    drop-shadow(0 6px 16px rgba(0,0,0,.7))
+    drop-shadow(0 0 30px rgba(255,200,80,.2));
+}
+
+/* 物品列表 */
+#case-d {
+  flex: 1;
+  margin: 0 var(--view-pad-x);
+  padding-bottom: 30px;
+}
+#case-d > p {
+  color: rgb(236,235,240);
+  font-size: 13px;
+  letter-spacing: 1px;
+  margin: 4px 0;
+}
+#case-d hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,.15);
+  margin: 4px 0 10px;
+}
+#case-d ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--drop-item-w), 1fr));
+  gap: 12px 12px;
+}
+#case-d ol li {
+  position: relative;
+  list-style: none;
+  display: block;
+  margin: 0;
+  height: calc(var(--drop-item-h) + 40px);
+  width: 100%;
+}
+.media-body { margin-top: 4px; }
+.media-body b {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+.media-body p {
+  margin: 2px 0 0;
+  color: white;
+  font-size: 12px;
+}
+
+/* 单个物品卡片 */
+.item-a {
+  display: block;
+  height: var(--drop-item-h);
+  width: 100%;
+  text-align: center;
+  position: relative;
+  border-radius: 1px;
+  background: url("../../assets/img/item_bg.png") center/100% 100% no-repeat,
+              linear-gradient(180deg, #3a4250 0%, #1a2029 100%);
+  overflow: hidden;
+}
+.item-a img {
+  max-width: 96%;
+  max-height: 96%;
+  width: auto;
+  height: auto;
+  image-rendering: pixelated;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.item-a.gold-cell img {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  object-fit: fill;
+  transform: none;
+}
+
+/* 品质色条（底部 4px） */
+.bar {
+  height: 4px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 0 0 1px 1px;
+  z-index: 3;
+}
+
+/* 7 档品质色 */
+.color1 { background-color: rgb(176,195,217); }
+.color2 { background-color: rgb(94,152,217); }
+.color3 { background-color: rgb(75,105,255); }
+.color4 { background-color: rgb(126,71,255); }
+.color5 { background-color: rgb(211,44,230); }
+.color6 { background-color: rgb(235,75,75); }
+.color7 { background-color: rgb(255,215,0); }
+.color1-font { color: rgb(176,195,217); }
+.color2-font { color: rgb(94,152,217); }
+.color3-font { color: rgb(75,105,255); }
+.color4-font { color: rgb(126,71,255); }
+.color5-font { color: rgb(211,44,230); }
+.color6-font { color: rgb(235,75,75); }
+.color7-font { color: rgb(255,215,0); }
+
+/* StatTrak 橙色（仓库/详情公用） */
+.stattrakcolor { color: #cf6a32; }
+
+/* 概率信息条（详情页底部） */
+.odds-bar {
+  margin: 18px var(--view-pad-x) 0;
+  padding: 10px 14px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-1);
+}
+.odds-bar .odds-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.odds-bar .odds-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+</style>
 <style>
 body { width: 1280px; min-height: 720px; }
 .view { padding: 24px 32px; }

@@ -33,8 +33,9 @@ function initial() {
       byNum:         { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
       statTrakByNum: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
     },
-    odds: null,
-    lastCase: null,    // 上次开的箱子名（用于「#csgo 开箱」无参数时默认）
+    odds: null,                  // 已废弃（保留兼容旧存档）
+    lastCase: null,              // 上次开的箱子名（用于「#csgo 开箱」无参数时默认）
+    lastCheckin: null,           // 上次签到日期 'YYYY-M-D'（CST）
   }
 }
 
@@ -147,23 +148,44 @@ export async function findInventoryByPrefix(uid, prefix) {
   return { item: d.inventory[idx], index: idx }
 }
 
+/* 内部：按物品对象算售价（避免循环引用 rarity.js） */
+function _priceOf(item) {
+  const mult = Config.get().sellPriceMultiplier || 1
+  const baseTable = { 1: 3, 2: 6, 3: 12, 4: 80, 5: 320, 6: 1500, 7: 8000 }
+  const base = baseTable[item.rarityNum] || 12
+  const wearMul = item.wear != null ? (1.5 - item.wear) : 1
+  const stMul = item.isStatTrak ? 2 : 1
+  return Math.max(1, Math.round(base * wearMul * stMul * mult))
+}
+
+/* 批量出售：filterNum=null 卖全部，否则只卖该 rarityNum；返回 { ok, count, total, coins } */
+export async function sellAll(uid, filterNum = null) {
+  return update(uid, d => {
+    const before = d.inventory.length
+    if (before === 0) return { ok: false, msg: '仓库空空如也' }
+    const keep = []
+    let count = 0, total = 0
+    for (const it of d.inventory) {
+      if (filterNum != null && it.rarityNum !== filterNum) { keep.push(it); continue }
+      total += _priceOf(it)
+      count++
+    }
+    if (count === 0) return { ok: false, msg: '没有符合条件的物品' }
+    d.inventory = keep
+    d.coins += total
+    return { ok: true, count, total, coins: d.coins, remaining: keep.length }
+  })
+}
+
 /* 出售：根据 uid 前缀找物品并出售，返回 { ok, price, item } */
 export async function sellByPrefix(uid, prefix) {
   return update(uid, d => {
     const p = (prefix || '').toLowerCase()
-    if (!p) return { ok: false, msg: '请提供 uid 前 6 位' }
+    if (!p) return { ok: false, msg: '请提供 uid 至少前 4 位（仓库图里物品下方有 6 位 uid 标识）' }
     const idx = d.inventory.findIndex(it => it.uid && it.uid.toLowerCase().startsWith(p))
     if (idx < 0) return { ok: false, msg: '找不到该物品' }
     const item = d.inventory[idx]
-    const price = (function () {
-      // 内联 sellPriceOf 避免循环依赖
-      const mult = Config.get().sellPriceMultiplier || 1
-      const baseTable = { 1: 3, 2: 6, 3: 12, 4: 80, 5: 320, 6: 1500, 7: 8000 }
-      const base = baseTable[item.rarityNum] || 12
-      const wearMul = item.wear != null ? (1.5 - item.wear) : 1
-      const stMul = item.isStatTrak ? 2 : 1
-      return Math.max(1, Math.round(base * wearMul * stMul * mult))
-    })()
+    const price = _priceOf(item)
     d.inventory.splice(idx, 1)
     d.coins += price
     return { ok: true, price, item, coins: d.coins }

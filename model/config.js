@@ -64,6 +64,14 @@ class Config {
     if (!this.cache[name]) this.load(name)
     return this.cache[name]
   }
+
+  /* 把 cache[name] 写回 config/name.yaml（chokidar 自身的写入会触发一次 reload，幂等） */
+  save(name = 'config') {
+    if (!this.cache[name]) return
+    const userFile = path.join(USER_DIR, `${name}.yaml`)
+    fs.writeFileSync(userFile, YAML.stringify(this.cache[name]), 'utf8')
+    log.mark?.(`[csgo-opener] 已保存 config/${name}.yaml`)
+  }
 }
 
 export default new Config()

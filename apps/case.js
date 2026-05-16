@@ -3,6 +3,7 @@ import { renderTpl } from '../model/render.js'
 import { ensureDataReady, findCaseByName } from '../model/data.js'
 import { RARITY, geometricOdds, getDefaultOdds, RARITY_NUMS_ASC } from '../model/rarity.js'
 import { renderDetailItem, fileUrl, randomBgUrl, pickGoldImageUrl, escapeHtml } from '../model/html_helpers.js'
+import { checkCooldown } from '../model/cooldown.js'
 
 function oddsForDisplay(caseObj) {
   if (caseObj.category === 'weapon_case' && caseObj.hasRare) {
@@ -28,12 +29,14 @@ export class CsgoCaseDetail extends plugin {
   }
 
   async detail(e) {
+    const cd = checkCooldown('case', e.user_id)
+    if (cd) { await e.reply(`详情冷却中，${cd}s 后再试`); return true }
     if (!(await ensureDataReady(e))) return true
     const m = e.msg.match(/^#?\s*csgo\s*(?:看|查看|详情)\s*(.+)$/)
     const name = (m && m[1] || '').trim()
     const c = findCaseByName(name)
     if (!c) {
-      await e.reply(`找不到箱子「${name}」。试试 #csgo 商城 看完整列表`)
+      await e.reply(`找不到箱子「${name}」\n试试 #csgo 商城 看完整列表\n名字支持包含匹配，例如「反冲」即可匹配「反冲武器箱」`)
       return true
     }
 

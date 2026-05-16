@@ -57,10 +57,34 @@ export class CsgoInventory extends plugin {
 
   async sell(e) {
     const m = e.msg.match(/^#?\s*csgo\s*出售\s*(.+)$/)
-    const prefix = (m && m[1] || '').trim()
-    if (!prefix || prefix.length < 4) { await e.reply('请提供 uid 至少前 4 位'); return true }
+    const arg = (m && m[1] || '').trim()
 
-    const r = await Store.sellByPrefix(e.user_id, prefix)
+    // 批量出售：「全部」/「全部 [品质]」
+    const ma = arg.match(/^全部(?:\s+(\S+))?$/)
+    if (ma) {
+      const sub = ma[1]
+      let filterNum = null, filterLabel = '全部'
+      if (sub) {
+        const n = rarityNumFromAlias(sub)
+        if (n == null || n === -1) {
+          await e.reply(`未知品质「${sub}」。支持：白/浅蓝/蓝/紫/粉/红/金`)
+          return true
+        }
+        filterNum = n
+        filterLabel = RARITY[n].name
+      }
+      const r = await Store.sellAll(e.user_id, filterNum)
+      if (!r.ok) { await e.reply(r.msg); return true }
+      await e.reply(`✅ 批量出售 [${filterLabel}] ${r.count} 件，获得 ${r.total} 金币\n余额 ${r.coins}，仓库剩 ${r.remaining} 件`)
+      return true
+    }
+
+    // 单件出售：按 uid 前缀
+    if (arg.length < 4) {
+      await e.reply('请提供 uid 至少前 4 位（仓库图里每个物品下方有 6 位 uid 标识）\n或用 #csgo 出售 全部 / #csgo 出售 全部 蓝')
+      return true
+    }
+    const r = await Store.sellByPrefix(e.user_id, arg)
     if (!r.ok) { await e.reply(r.msg || '出售失败'); return true }
     const it = r.item
     await e.reply(`已出售 ${it.weapon}${it.paint ? ' | ' + it.paint : ''}${it.isStatTrak ? ' (StatTrak™)' : ''}，获得 ${r.price} 金币，余额 ${r.coins}`)

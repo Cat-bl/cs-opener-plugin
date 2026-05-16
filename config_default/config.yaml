@@ -6,6 +6,9 @@ initialCoins: 10000
 # 售价倍率（1.0 = 原版）
 sellPriceMultiplier: 1.0
 
+# 每日签到奖励金币
+dailyReward: 500
+
 # 标准武器箱默认掉率（万分比，总和 = 100000）
 # 3 军规级 / 4 受限 / 5 保密 / 6 隐秘 / 7 罕见特殊
 defaultOdds:
@@ -21,10 +24,12 @@ historyLimit: 500
 # 视频生成参数
 video:
   fps: 60
-  introMs: 2000       # 预览页停留时长
-  revealMs: 5500      # 揭示页停留时长
+  introMs: 2000        # 预览页停留时长
+  revealMs: 5500       # 揭示页停留时长
   width: 1280
   height: 720
+  maxConcurrent: 2     # 同时生成的视频数（CPU/内存上限，建议 2-4）
+  maxPending: 5        # 最大排队人数（超过直接拒绝）
 
 # Puppeteer 截图视口
 puppeteer:
@@ -32,10 +37,13 @@ puppeteer:
   height: 720
   scale: 1
 
-# 命令冷却（秒），防刷
+# 命令冷却（秒），防刷；置 0 / 留空 = 不限
 cooldown:
-  open: 2
-  shop: 1
+  open: 3     # 开箱（视频生成最贵）
+  shop: 1     # 商城（puppeteer 截图）
+  case: 2     # 单箱详情
+  checkin: 1  # 签到
+  inv: 1      # 仓库
 
 # 资源下载（#csgo 更新数据 / node tools/download_skins.mjs 走这里）
 download:
