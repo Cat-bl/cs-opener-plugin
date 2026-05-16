@@ -98,12 +98,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  height: 100%;
+  /* 不设 height: 100% / overflow: hidden —— puppeteer 截图依赖 body 撑开到内容高 */
   background: var(--bg-0);
   color: var(--text-0);
   font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Tahoma, sans-serif;
   font-size: 14px;
-  overflow: hidden;
   user-select: none;
 }
 

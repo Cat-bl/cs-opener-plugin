@@ -86,7 +86,7 @@ export async function renderTpl(tpl, data = {}, opts = {}) {
     const page = await browser.newPage()
     await page.setViewport({ width, height, deviceScaleFactor: scale })
     await page.setContent(html, { waitUntil: 'networkidle0' })
-    const buf = await page.screenshot({ type: 'png', fullPage: false })
+    const buf = await page.screenshot({ type: 'png', fullPage: true })
     // 返回 segment.image 兼容对象（Yunzai 环境下 segment 是 global）
     if (globalThis.segment?.image) return globalThis.segment.image(buf)
     return buf
@@ -119,7 +119,7 @@ export async function renderToFile(tpl, data, outFile, opts = {}) {
       // 设置 baseURL 让相对路径资源可加载
       await page.goto('file:///' + tplFile.replace(/\\/g, '/'), { waitUntil: 'domcontentloaded' })
       await page.setContent(html, { waitUntil: 'networkidle0' })
-      await page.screenshot({ path: outFile, type: 'png', fullPage: false })
+      await page.screenshot({ path: outFile, type: 'png', fullPage: true })
     } finally {
       await browser.close()
     }
