@@ -2,9 +2,9 @@
 
 > **CS 模拟开箱** TRSS-Yunzai 插件 — 商城浏览 / 视频开箱 / 仓库管理 全套体验
 
-[![ByMykel](https://img.shields.io/badge/data-ByMykel%2FCS--API-blue)](https://github.com/ByMykel/CS-API)
+[![ByMykel](https://img.shields.io/badge/data-ByMykel%2FCSGO--API-blue)](https://github.com/ByMykel/CSGO-API)
 
-复刻 CS 客户端开箱流程，包括 **6 秒滚动条 + 黄色指针 + 上下黑边 letterbox + 真实音效 + 金色全屏旋转光晕 + 品质色发光 reveal + 右上角玩家昵称水印**。
+复刻 CS 客户端开箱流程，包括 **6 秒滚动条 + 黄色指针 + 上下黑边 letterbox + 真实音效 + 金色全屏旋转光晕 + 品质色发光 reveal + 右上角玩家昵称水印 + 底部作者署名**。
 开箱以 MP4 视频形式发到群里（约 14s），其余页面用 puppeteer 截图。
 预览页物品太多时会**自动滚动展示**完整列表（2s 内匀速滚完），滚完才开箱。
 
@@ -23,7 +23,7 @@
 | 命令 | 说明 | 输出 |
 |---|---|---|
 | `#cs` 或 `#cs 帮助` | 命令清单 | 图 |
-| `#cs 签到` | **每日领 500 金币**（CST 0 点重置） | 文字 |
+| `#cs 签到` | **每日领 500 金币**（CST 0 点重置；图含头像/余额/累计开箱/最稀有掉落） | 图 |
 | `#cs 商城` | 默认看武器箱 | 图 |
 | `#cs 商城 印花胶囊` | 切换类别<br>（武器箱 / 纪念包 / 高光纪念包 / 印花胶囊 / 签名胶囊 / 布章包 / 胸章胶囊 / 涂鸦箱 / 音乐盒集） | 图 |
 | `#cs 看 反冲武器箱` | 查看单个箱子详情（含全部物品+概率） | 图 |
@@ -47,7 +47,7 @@
 | `#cs 更新数据` | 增量下载箱图/物品图（首次必跑；完成后自动刷新内存） |
 | `#cs 更新数据 强制` | 强制重拉 `crates.json` 再下载 |
 | `#cs 状态` | 查看下载任务实时进度 |
-| `#cs更新` | 从 git 仓库拉最新插件代码（拉完需重启 Yunzai 生效） |
+| `#cs 更新` | 从 git 仓库拉最新插件代码（拉完需重启 Yunzai 生效） |
 | `#cs 概率预设 欧皇` | 切全局预设（默认/欧皇/极品/均匀/残酷），写入 `config.yaml` |
 | `#cs 设置概率 红 1000` | 调全局单档（万分比），写入 `config.yaml` |
 
@@ -192,7 +192,7 @@ download:
 | 下载失败大量超时 | 代理速度不行；可改小 `download.concurrency` 到 5；或换代理 |
 | `找不到箱子「xxx」` | 名字必须包含官方名子串，例如「反冲」即可匹配「反冲武器箱」 |
 | 视频在群里发不出 | 文件本身只有 ~2MB，一般是 OneBot 适配器/群限速；私聊试试 |
-| 多人同时开箱卡 | 已内置 ≤ 2 并发视频生成；高负载升级 CPU 或在 config 改 `video.fps: 30` |
+| 多人同时开箱卡 | 已内置 ≤ 2 并发视频生成 + **每用户同时只能开 1 个箱**；高负载可升级 CPU 或在 config 改 `video.fps: 30` |
 | 想增量更新新出的箱子 | 发 `#cs 更新数据 强制`（重拉 crates.json，完成后自动加载） |
 
 ---
@@ -225,7 +225,7 @@ cs-opener-plugin/
 ├── resources/
 │   ├── html/                 # puppeteer 模板
 │   │   ├── help.html / shop.html / case-detail.html
-│   │   └── inventory.html / history.html
+│   │   └── inventory.html / history.html / checkin.html
 │   └── css/                  # 模板样式
 ├── assets/                   # 静态资源
 │   ├── data/crates.json      # 箱子元数据（从 ByMykel）
@@ -246,7 +246,7 @@ cs-opener-plugin/
 
 ## 致谢
 
-- **数据**：[ByMykel/CS-API](https://github.com/ByMykel/CS-API) — 箱子/物品/品质元数据
+- **数据**：[ByMykel/CSGO-API](https://github.com/ByMykel/CSGO-API) — 箱子/物品/品质元数据
 - **音效**：CS 客户端原版
 - **图片**：Steam CDN
 - **框架**：[TRSS-Yunzai](https://github.com/TimeRainStarSky/Yunzai)
