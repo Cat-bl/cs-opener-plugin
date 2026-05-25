@@ -55,6 +55,10 @@ import fs from 'node:fs/promises'
 /* 全局固定水印（作者标识） */
 export const WATERMARK = 'Trss-Yunzai · cs-opener-plugin · 冰凉到通透'
 
+async function removeTempHtml(saveId) {
+  await fs.rm(path.join(process.cwd(), 'temp', 'html', PLUGIN_NAME, `${saveId}.html`), { force: true }).catch(() => {})
+}
+
 export async function renderTpl(tpl, data = {}, opts = {}) {
   const cfg = Config.get().puppeteer || {}
   const width  = opts.width  ?? cfg.width  ?? 1280
@@ -73,16 +77,21 @@ export async function renderTpl(tpl, data = {}, opts = {}) {
 
   const pp = await getPuppeteer()
   if (pp.mode === 'yunzai') {
-    return await pp.api.screenshot(PLUGIN_NAME, {
-      saveId: `${tpl}-${Date.now()}`,
-      imgType: 'png',
-      tplFile,
-      pluResPath: 'file:///' + pluResPath + '/',
-      pluRoot,
-      width, height, scale,
-      _data: enriched,   // 透传给模板（如果模板用 template engine 也会用上）
-      ...enriched,        // 顶层也铺一份，方便 puppeteer 默认模板引擎使用
-    })
+    const saveId = `${tpl}-${Date.now()}`
+    try {
+      return await pp.api.screenshot(PLUGIN_NAME, {
+        saveId,
+        imgType: 'png',
+        tplFile,
+        pluResPath: 'file:///' + pluResPath + '/',
+        pluRoot,
+        width, height, scale,
+        _data: enriched,   // 透传给模板（如果模板用 template engine 也会用上）
+        ...enriched,        // 顶层也铺一份，方便 puppeteer 默认模板引擎使用
+      })
+    } finally {
+      await removeTempHtml(saveId)
+    }
   }
 
   // standalone：自己渲染模板 + 截图
